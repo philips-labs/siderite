@@ -23,8 +23,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -35,13 +36,16 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "siderite",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "helper tool for running HSDP IronIO tasks",
+	Long: `Siderite implements a number of convenience tasks to make 
+	the interaction with HSDP IronIO more pleasant:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+It supports encrypting payloads using the cluster public key. It also
+has a runner mode which you can set up as th ENTRYPOINT for your Docker
+image. It will parse its own Payload JSON format which allows you to easily
+define the command and environment which should run as a Iron task. Finally
+it contains a doctor command which verifies your environment is set up correctly
+to interact with HSDP Iron.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },

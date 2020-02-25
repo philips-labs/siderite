@@ -18,6 +18,7 @@ const (
 	keyFooter = "-----END PUBLIC KEY-----"
 )
 
+//EncryptPayload encrypts pbytes using publicKey
 func EncryptPayload(publicKey []byte, pbytes []byte) (string, error) {
 	rsaPublicKey, err := parsePublicKey(publicKey)
 	if err != nil {
@@ -62,11 +63,9 @@ func parsePublicKey(pubkey []byte) (key *rsa.PublicKey, err error) {
 			err = fmt.Errorf("panic during decode")
 		}
 	}()
+	fixed := FormatBrokenPubkey(pubkey)
+	rsablock, _ := pem.Decode(fixed)
 
-	rsablock, _ := pem.Decode(pubkey)
-	if err != nil {
-		rsablock, _ = pem.Decode([]byte(formatBrokenPubKey(string(pubkey))))
-	}
 	rsaKey, err := x509.ParsePKIXPublicKey(rsablock.Bytes)
 	if err != nil {
 		return nil, err
@@ -78,9 +77,10 @@ func parsePublicKey(pubkey []byte) (key *rsa.PublicKey, err error) {
 	return rsaPublicKey, nil
 }
 
-func formatBrokenPubKey(pubkey string) string {
-	a := strings.Replace(pubkey, keyHeader, "", 1)
+// FormatBrokenPubkey fixes to broken service broker pubkey format
+func FormatBrokenPubkey(pubkey []byte) []byte {
+	a := strings.Replace(string(pubkey), keyHeader, "", 1)
 	b := strings.Replace(a, keyFooter, "", 1)
 	c := strings.ReplaceAll(b, " ", "\n")
-	return keyHeader + c + keyFooter
+	return []byte(keyHeader + c + keyFooter)
 }
