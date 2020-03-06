@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 	the interaction with HSDP IronIO more pleasant:
 
 It supports encrypting payloads using the cluster public key. It also
-has a runner mode which you can set up as th ENTRYPOINT for your Docker
+has a runner mode which you can set up as the ENTRYPOINT for your Docker
 image. It will parse its own Payload JSON format which allows you to easily
 define the command and environment which should run as a Iron task. Finally
 it contains a doctor command which verifies your environment is set up correctly
