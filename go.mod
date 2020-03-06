@@ -1,4 +1,4 @@
-module github.com/philips-labs/siderite
+module siderite
 
 go 1.13
 
