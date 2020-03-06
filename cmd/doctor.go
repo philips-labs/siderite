@@ -28,6 +28,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"siderite/iron"
 	"strings"
 
 	"github.com/fatih/color"
@@ -45,22 +46,6 @@ var doctorCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(doctorCmd)
-}
-
-// Config describes IronIO config
-type Config struct {
-	ClusterInfo []struct {
-		ClusterID   string `json:"cluster_id"`
-		ClusterName string `json:"cluster_name"`
-		Pubkey      string `json:"pubkey"`
-		UserID      string `json:"user_id"`
-	} `json:"cluster_info"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	Project   string `json:"project"`
-	ProjectID string `json:"project_id"`
-	Token     string `json:"token"`
-	UserID    string `json:"user_id"`
 }
 
 type proc func() error
@@ -124,7 +109,7 @@ func testConfig() error {
 		fmt.Printf("%s config file issue: %s\n", problem, err.Error())
 		return err
 	}
-	var jsonConfig Config
+	var jsonConfig iron.Config
 	err = json.Unmarshal(configJSON, &jsonConfig)
 	if err != nil {
 		fmt.Printf("%s error parsing config: %s\n", problem, err.Error())
