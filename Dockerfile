@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 RUN git rev-parse --short HEAD
 RUN GIT_COMMIT=$(git rev-parse --short HEAD) && \
-	go build -ldflags "-X github.com/philips-labs/siderite/cmd.GitCommit=${GIT_COMMIT}"
+	go build -ldflags "-X siderite/cmd.GitCommit=${GIT_COMMIT}"
 
 FROM alpine:latest
 RUN apk update && apk add ca-certificates && apk add postgresql-client && rm -rf /var/cache/apk/*
