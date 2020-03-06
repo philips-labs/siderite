@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -23,12 +24,31 @@ which will output a JSON structure with proper escaping`,
 
 func init() {
 	rootCmd.AddCommand(env2jsonCmd)
+	env2jsonCmd.Flags().StringP("include", "i", "", "comma separated list of variables to include")
+	env2jsonCmd.Flags().StringP("exclude", "x", "", "comma separated list of variables to exclude")
 }
 
 var envParse = regexp.MustCompile(`^(.*?)=(.*)$`)
 
+func contains(s []string, searchterm string) bool {
+	i := sort.SearchStrings(s, searchterm)
+	return i < len(s) && s[i] == searchterm
+}
+
 func env2JSON(cmd *cobra.Command, args []string) {
 	var payload Payload
+
+	includeList, _ := cmd.Flags().GetString("include")
+	excludeList, _ := cmd.Flags().GetString("exclude")
+	include := strings.Split(includeList, ",")
+	exclude := strings.Split(excludeList, ",")
+	sort.Strings(include)
+	sort.Strings(exclude)
+
+	if len(include) > 0 && include[0] != "" && len(exclude) > 0 && exclude[0] != "" {
+		fmt.Fprintf(os.Stderr, "can't use include and exclude simultaneously\n")
+		return
+	}
 
 	envInput, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
@@ -39,15 +59,21 @@ func env2JSON(cmd *cobra.Command, args []string) {
 
 	for _, line := range strings.Split(strings.TrimSuffix(string(envInput), "\n"), "\n") {
 		parsed := envParse.FindStringSubmatch(line)
-		if len(parsed) < 3 {
-			fmt.Println("Skipping line")
-		} else {
-			payload.Env[parsed[1]] = parsed[2]
+		if len(parsed) == 3 {
+			key := parsed[1]
+			value := parsed[2]
+			if contains(exclude, key) {
+				continue
+			}
+			if len(include) > 0 && include[0] != "" && !contains(include, key) {
+				continue
+			}
+			payload.Env[key] = value
 		}
 	}
 	b, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Println(`{"env":[]}`)
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 	}
 
 	var out bytes.Buffer
