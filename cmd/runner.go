@@ -12,10 +12,10 @@ import (
 // runnerCmd represents the runner command
 var runnerCmd = &cobra.Command{
 	Use:   "runner",
-	Short: "Runs command described in payload",
-	Long: `Runs the command provided in the payload file.
+	Short: "runs command described in payload",
+	Long: `runs the command provided in the payload file.
 
-This mode should be used inside an IronIO docker task. siderite
+this mode should be used inside an IronIO docker task. siderite
 will block until the command exits.`,
 	Run: run,
 }
@@ -26,17 +26,23 @@ func init() {
 
 // Payload describes the JSON payload file
 type Payload struct {
-	Env map[string]string `json:"env,omitempty"`
-	Cmd []string          `json:"cmd,omitempty"`
+	Version string            `json:"version"`
+	Env     map[string]string `json:"env,omitempty"`
+	Cmd     []string          `json:"cmd,omitempty"`
 }
 
 func run(cmd *cobra.Command, args []string) {
+	fmt.Printf("[siderite] version %s start\n", GitCommit)
+
 	worker.ParseFlags()
 	p := &Payload{}
 	worker.PayloadFromJSON(p)
 
+	if len(p.Version) < 1 || p.Version != "1" {
+		fmt.Println("[siderite] unsupported or unknown payload version", p.Version)
+	}
 	if len(p.Cmd) < 1 {
-		fmt.Println("Missing command")
+		fmt.Println("[siderite] missing command")
 		os.Exit(1)
 	}
 
@@ -49,5 +55,5 @@ func run(cmd *cobra.Command, args []string) {
 		command.Env = append(command.Env, k+"="+v)
 	}
 	command.Run()
-	fmt.Printf("siderite %s exit\n", GitCommit)
+	fmt.Printf("[siderite] version %s exit\n", GitCommit)
 }

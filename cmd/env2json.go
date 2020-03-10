@@ -26,6 +26,9 @@ func init() {
 	rootCmd.AddCommand(env2jsonCmd)
 	env2jsonCmd.Flags().StringP("include", "i", "", "comma separated list of variables to include")
 	env2jsonCmd.Flags().StringP("exclude", "x", "", "comma separated list of variables to exclude")
+	env2jsonCmd.Flags().StringSliceP("env", "e", []string{}, "add environment variable")
+	env2jsonCmd.Flags().StringSliceP("cmd", "c", []string{}, "command to include")
+	env2jsonCmd.Flags().BoolP("nostdin", "n", false, "skip reading from stdin")
 }
 
 var envParse = regexp.MustCompile(`^(.*?)=(.*)$`)
@@ -49,12 +52,19 @@ func env2JSON(cmd *cobra.Command, args []string) {
 		fmt.Fprintf(os.Stderr, "can't use include and exclude simultaneously\n")
 		return
 	}
+	envInput := []byte("")
+	var err error
 
-	envInput, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		fmt.Println(err)
-		return
+	nostdin, _ := cmd.Flags().GetBool("nostdin")
+
+	if !nostdin {
+		envInput, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
+
 	payload.Env = make(map[string]string)
 
 	for _, line := range strings.Split(strings.TrimSuffix(string(envInput), "\n"), "\n") {
@@ -70,6 +80,21 @@ func env2JSON(cmd *cobra.Command, args []string) {
 			}
 			payload.Env[key] = value
 		}
+	}
+	// Extra environment
+	extraVars, _ := cmd.Flags().GetStringSlice("env")
+	for _, e := range extraVars {
+		parsed := envParse.FindStringSubmatch(e)
+		if len(parsed) == 3 {
+			key := parsed[1]
+			value := parsed[2]
+			payload.Env[key] = value
+		}
+	}
+	// Command
+	cmdVars, _ := cmd.Flags().GetStringSlice("cmd")
+	for _, c := range cmdVars {
+		payload.Cmd = append(payload.Cmd, c)
 	}
 	b, err := json.Marshal(payload)
 	if err != nil {

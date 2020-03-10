@@ -18,15 +18,15 @@ var GitCommit = "deadbeaf"
 var rootCmd = &cobra.Command{
 	Use:   "siderite",
 	Short: "helper tool for running HSDP IronIO tasks",
-	Long: `Siderite implements a number of convenience tasks to make 
-	the interaction with HSDP IronIO more pleasant:
+	Long: `siderite implements a number of convenience tasks to make 
+the interaction with HSDP IronIO more pleasant:
 
-It supports encrypting payloads using the cluster public key. It also
-has a runner mode which you can set up as the ENTRYPOINT for your Docker
-image. It will parse its own Payload JSON format which allows you to easily
+siderite supports encrypting payloads using the cluster public key, implements
+a runner mode which you can set up as the ENTRYPOINT for your Docker
+image. You can use it to prepare a JSON format payload which allows you to easily
 define the command and environment which should run as a Iron task. Finally
 it contains a doctor command which verifies your environment is set up correctly
-to interact with HSDP Iron.`,
+to interact with HSDP Iron`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },

@@ -38,10 +38,9 @@ import (
 // doctorCmd represents the doctor command
 var doctorCmd = &cobra.Command{
 	Use:   "doctor",
-	Short: "Checks system configuration",
-	Long: `Check wether your system is configure so it can interact
-	with the HSDP iron`,
-	Run: doctor,
+	Short: "checks system configuration",
+	Long:  `check wether your system is configure so it can interact with the HSDP iron`,
+	Run:   doctor,
 }
 
 func init() {

@@ -6,14 +6,15 @@ import (
 	"os"
 
 	"siderite/iron"
+
 	"github.com/spf13/cobra"
 )
 
 // encryptCmd represents the encrypt command
 var encryptCmd = &cobra.Command{
 	Use:   "encrypt",
-	Short: "Encrypts input with the cluster public key",
-	Long:  `Encrypts input (stdin or file) using the cluster public key`,
+	Short: "encrypts input with the cluster public key",
+	Long:  `encrypts input (stdin or file) using the cluster public key`,
 	Run:   encrypt,
 }
 
@@ -72,5 +73,5 @@ func encrypt(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(ciphertext)
+	fmt.Fprintf(os.Stdout, ciphertext+"\n")
 }
