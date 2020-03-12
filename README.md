@@ -6,8 +6,17 @@ siderite is a companion tool to the iron CLI to make the interaction with the HS
 * CF CLI - https://docs.cloudfoundry.org/cf-cli/install-go-cli.html
 * Access to HSDP CF
 
+# configuration
+as a first step you need to have a HSDP Iron instances provisioned through the HSDP Iron broker. The service details of this instance should be in your home folder as `~/.iron.json`. This can be done using the sequence of commands shown below:
+
+```shell
+$ cf cs hsdp-iron dev-large-encrypted iron
+$ cf csk iron siderite
+$ cf service-key iron siderite > ~/.iron.json
+```
+
 # usage
-siderite use the following JSON payload format
+siderite defines the following JSON payload format
 ```json
 {
 	"version": "1",
@@ -21,20 +30,44 @@ siderite use the following JSON payload format
 
 | field | type |description | required | example      |
 |-------|------|-------|----------|--------------|
-| version | string | version of JSON payload | Y | must be `"1"` |
+| version | string | version of JSON payload | Y | must be `"1"` for now |
 | cmd | []string | command to execute, array string | Y| `["df", "-h"]` |
 | env | hashmap | hash with environment variables | N | `{"foo": "bar"}` |
+
 
 # commands
 
 ## doctor
 checks your system for correct configuration and suggest steps to take
+```shell
+$ siderite doctor
+[✓] iron CLI installed (version 0.1.6)
+[✓] iron configuration file (/Users/andy/.iron.json)
+[✓] cf CLI installed (cf version 6.49.0+d0dfa93bb.2020-01-07)
+```
 
 ## encrypt
 encrypts input (stdin by default) with the cluster public key
+```shell
+$ echo '{"cmd":"ls"}'|siderite encrypt
+VRUYw6MZqakMz1KX6Ag21EfwEj9VBCV0jVpo3buEY8kIqaZK+dgC7YoJNjQ7tFfM9bPFMw+8yVawNG0u4IeLeSkSH+aLCA8bXVMl5hKVVOelY+eGceD9qXhTq9RDAyuY2RJ3XCHIUfQre1XIn8jO2GCtIUSIvKJ7XB6lYPg2jocXsYQ8xvVOnESiWexTur94afdB82HpFx6yDcHlrblovEdqtVk/fzOZ8A==
+```
 
 ## env2json
 converts ENV style input (on stdin by default) to the siderite JSON payload format
+```shell
+$ echo 'FOO=BAR'|siderite env2json -c "echo","\$FOO"
+{
+  "version": "1",
+  "env": {
+    "FOO": "BAR"
+  },
+  "cmd": [
+    "echo",
+    "$FOO"
+  ]
+}
+```
 
 ## runner
 opens the payload file references by `PAYLOAD_FILE` environment and executes the command, mapping all output to stdout. This mode should be used as the `ENTRYPOINT` command in your Docker image
@@ -79,6 +112,7 @@ cf ssh app -c env | siderite env2json > payload.json
 
 ```json
 {
+  "version": "1",
   "cmd": ["java", "-jar", "/data/app.jar"],
   "env": {
     "VCAP_SERVICES": "[REDACTED]",

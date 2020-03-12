@@ -41,6 +41,8 @@ func contains(s []string, searchterm string) bool {
 func env2JSON(cmd *cobra.Command, args []string) {
 	var payload Payload
 
+	payload.Version = "1"
+
 	includeList, _ := cmd.Flags().GetString("include")
 	excludeList, _ := cmd.Flags().GetString("exclude")
 	include := strings.Split(includeList, ",")
