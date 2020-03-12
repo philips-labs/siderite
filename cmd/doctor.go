@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"siderite/iron"
+	"github.com/philips-labs/siderite/iron"
 	"strings"
 
 	"github.com/fatih/color"

@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"siderite/iron"
+	"github.com/philips-labs/siderite/iron"
 
 	"github.com/spf13/cobra"
 )
