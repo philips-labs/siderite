@@ -44,6 +44,10 @@ func encrypt(cmd *cobra.Command, args []string) {
 			fmt.Println(err)
 			return
 		}
+		if len(config.ClusterInfo) == 0 {
+			fmt.Println("missing cluster_info in configuration")
+			return
+		}
 		if key = config.ClusterInfo[0].Pubkey; key == "" {
 			fmt.Println("missing public key in configuration")
 			return
