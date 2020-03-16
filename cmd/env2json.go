@@ -68,19 +68,26 @@ func env2JSON(cmd *cobra.Command, args []string) {
 	}
 
 	payload.Env = make(map[string]string)
+	var key string
 
 	for _, line := range strings.Split(strings.TrimSuffix(string(envInput), "\n"), "\n") {
 		parsed := envParse.FindStringSubmatch(line)
 		if len(parsed) == 3 {
-			key := parsed[1]
+			key = parsed[1]
 			value := parsed[2]
 			if contains(exclude, key) {
+				key = ""
 				continue
 			}
 			if len(include) > 0 && include[0] != "" && !contains(include, key) {
+				key = ""
 				continue
 			}
 			payload.Env[key] = value
+		} else { // Most likely part of the previous ENV
+			if len(key) > 0 {
+				payload.Env[key] = payload.Env[key] + line
+			}
 		}
 	}
 	// Extra environment
