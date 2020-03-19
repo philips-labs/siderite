@@ -13,22 +13,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// env2jsonCmd represents the env2json command
-var env2jsonCmd = &cobra.Command{
-	Use:   "env2json",
+// env2payloadCmd represents the env2payload command
+var env2payloadCmd = &cobra.Command{
+	Use:   "env2payload",
 	Short: "Converts env output to JSON payload",
 	Long: `You can pipe the output of the env command to this command 
 which will output a JSON structure with proper escaping`,
-	Run: env2JSON,
+	Run: env2payload,
 }
 
 func init() {
-	rootCmd.AddCommand(env2jsonCmd)
-	env2jsonCmd.Flags().StringP("include", "i", "", "comma separated list of variables to include")
-	env2jsonCmd.Flags().StringP("exclude", "x", "", "comma separated list of variables to exclude")
-	env2jsonCmd.Flags().StringSliceP("env", "e", []string{}, "add environment variable")
-	env2jsonCmd.Flags().StringSliceP("cmd", "c", []string{}, "command to include")
-	env2jsonCmd.Flags().BoolP("nostdin", "n", false, "skip reading from stdin")
+	rootCmd.AddCommand(env2payloadCmd)
+	env2payloadCmd.Flags().StringP("include", "i", "", "comma separated list of variables to include")
+	env2payloadCmd.Flags().StringP("exclude", "x", "", "comma separated list of variables to exclude")
+	env2payloadCmd.Flags().StringSliceP("env", "e", []string{}, "add environment variable")
+	env2payloadCmd.Flags().StringSliceP("cmd", "c", []string{}, "command to include")
+	env2payloadCmd.Flags().BoolP("nostdin", "n", false, "skip reading from stdin")
 }
 
 var envParse = regexp.MustCompile(`^(.*?)=(.*)$`)
@@ -38,7 +38,7 @@ func contains(s []string, searchterm string) bool {
 	return i < len(s) && s[i] == searchterm
 }
 
-func env2JSON(cmd *cobra.Command, args []string) {
+func env2payload(cmd *cobra.Command, args []string) {
 	var payload Payload
 
 	payload.Version = "1"

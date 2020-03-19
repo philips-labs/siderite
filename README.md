@@ -53,10 +53,10 @@ $ echo '{"cmd":"ls"}'|siderite encrypt
 VRUYw6MZqakMz1KX6Ag21EfwEj9VBCV0jVpo3buEY8kIqaZK+dgC7YoJNjQ7tFfM9bPFMw+8yVawNG0u4IeLeSkSH+aLCA8bXVMl5hKVVOelY+eGceD9qXhTq9RDAyuY2RJ3XCHIUfQre1XIn8jO2GCtIUSIvKJ7XB6lYPg2jocXsYQ8xvVOnESiWexTur94afdB82HpFx6yDcHlrblovEdqtVk/fzOZ8A==
 ```
 
-## env2json
+## env2payload
 converts ENV style input (on stdin by default) to the siderite JSON payload format
 ```shell
-$ echo 'FOO=BAR'|siderite env2json -c "echo","\$FOO"
+$ echo 'FOO=BAR'|siderite env2payload -c "echo","\$FOO"
 {
   "version": "1",
   "env": {
@@ -105,7 +105,7 @@ cf service-key iron siderite > ~/.iron.json
 ### 5. capture ENV variables from your existing CF app
 
 ```bash
-cf ssh app -c env | siderite env2json > payload.json
+cf ssh app -c env | siderite env2payload > payload.json
 ```
 
 ### 6. add cmd to payload.json
