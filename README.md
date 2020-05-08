@@ -12,7 +12,7 @@ as a first step you need to have a HSDP Iron instances provisioned through the H
 ```shell
 $ cf cs hsdp-iron dev-large-encrypted iron
 $ cf csk iron siderite
-$ cf service-key iron siderite > ~/.iron.json
+$ cf service-key iron siderite |tail -n +2 > ~/.iron.json
 ```
 
 # usage
