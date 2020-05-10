@@ -99,7 +99,7 @@ cf csk iron siderite
 
 ### 4. setup ~/.iron.json
 ```bash
-cf service-key iron siderite > ~/.iron.json
+cf service-key iron siderite | tail -n +2 > ~/.iron.json
 ```
 
 ### 5. capture ENV variables from your existing CF app
