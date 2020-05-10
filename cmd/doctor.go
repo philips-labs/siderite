@@ -3,11 +3,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/philips-labs/siderite/iron"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"github.com/philips-labs/siderite/iron"
 	"strings"
 
 	"github.com/fatih/color"
@@ -28,13 +29,16 @@ func init() {
 
 type proc func() error
 
-var yellow = color.New(color.FgYellow).SprintFunc()
-var green = color.New(color.FgGreen).SprintFunc()
-var red = color.New(color.FgRed).SprintFunc()
-
-var pass = green("[✓]")
-var warn = yellow("[!]")
-var problem = red("[✗]")
+var (
+	yellow              = color.New(color.FgYellow).SprintFunc()
+	green               = color.New(color.FgGreen).SprintFunc()
+	red                 = color.New(color.FgRed).SprintFunc()
+	pass                = green("[✓]")
+	warn                = yellow("[!]")
+	problem             = red("[✗]")
+	ErrNoClusters       = errors.New("no clusters found in configuration")
+	ErrMissingPublicKey = errors.New("missing public key")
+)
 
 func testIronCLI() error {
 	path, err := exec.LookPath("iron")
@@ -94,6 +98,17 @@ func testConfig() error {
 		return err
 	}
 	fmt.Printf("%s iron configuration file (%s)\n", pass, configFile)
+	if len(jsonConfig.ClusterInfo) == 0 {
+		fmt.Printf("%s no clusters found in configuration\n", problem)
+		return ErrNoClusters
+	}
+	fmt.Printf("%s cluster found (%s)\n", pass, jsonConfig.ClusterInfo[0].ClusterID)
+	if jsonConfig.ClusterInfo[0].Pubkey == "" {
+		fmt.Printf("%s missing public key for cluster: %s\n", problem,
+			jsonConfig.ClusterInfo[0].ClusterID)
+		return ErrMissingPublicKey
+	}
+	fmt.Printf("%s public key for cluster found (%s)\n", pass, jsonConfig.ClusterInfo[0].ClusterID)
 	return nil
 }
 
