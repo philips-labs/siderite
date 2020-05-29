@@ -103,6 +103,7 @@ func testConfig() error {
 		return ErrNoClusters
 	}
 	fmt.Printf("%s cluster found (%s)\n", pass, jsonConfig.ClusterInfo[0].ClusterID)
+	fmt.Printf("%s cluster type (%s)\n", pass, jsonConfig.ClusterInfo[0].ClusterName)
 	if jsonConfig.ClusterInfo[0].Pubkey == "" {
 		fmt.Printf("%s missing public key for cluster: %s\n", problem,
 			jsonConfig.ClusterInfo[0].ClusterID)
