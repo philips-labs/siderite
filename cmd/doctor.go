@@ -109,11 +109,18 @@ func testConfig() error {
 		return ErrMissingPublicKey
 	}
 	fmt.Printf("%s public key for cluster found (%s)\n", pass, jsonConfig.ClusterInfo[0].ClusterID)
+	key := jsonConfig.ClusterInfo[0].Pubkey
+	_, err = iron.EncryptPayload([]byte(key), []byte("foo"))
+	if err != nil {
+		fmt.Printf("%s failed to use public key: %s\n", problem, err)
+		return err
+	}
+	fmt.Printf("%s public key is usable\n", pass)
 	return nil
 }
 
 func doctor(cmd *cobra.Command, args []string) {
-	var errors bool
+	var hasErrors bool
 
 	e := []proc{
 		testIronCLI,
@@ -123,10 +130,10 @@ func doctor(cmd *cobra.Command, args []string) {
 
 	for _, p := range e {
 		if p() != nil {
-			errors = true
+			hasErrors = true
 		}
 	}
-	if errors {
-		fmt.Println("some errors were detected")
+	if hasErrors {
+		fmt.Println("some hasErrors were detected")
 	}
 }
