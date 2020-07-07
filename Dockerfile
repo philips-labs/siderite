@@ -1,6 +1,5 @@
-FROM golang:1.14-alpine3.11 as builder
+FROM golang:1.14.4-stretch as builder
 LABEL maintainer="andy.lo-a-foe@philips.com"
-RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /siderite
 COPY go.mod .
 COPY go.sum .
@@ -14,8 +13,7 @@ RUN git rev-parse --short HEAD
 RUN GIT_COMMIT=$(git rev-parse --short HEAD) && \
 	go build -ldflags "-X siderite/cmd.GitCommit=${GIT_COMMIT}"
 
-FROM alpine:latest
-RUN apk update && apk add ca-certificates && apk add postgresql-client && rm -rf /var/cache/apk/*
+FROM golang:1.14.4-stretch
 WORKDIR /app
 COPY --from=builder /siderite/siderite /app
 ENTRYPOINT ["/app/siderite","runner"]
