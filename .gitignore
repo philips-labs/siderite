@@ -1,5 +1,6 @@
 .vscode/
 .idea/
+testfiles/
 dist/
 siderite
 *.exe
