@@ -30,14 +30,29 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 	configFile := filepath.Join(home, ".iron.json")
-	data, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		return nil, err
+	data, err_home := ioutil.ReadFile(configFile) //home
+	local_data, err_local := ioutil.ReadFile("iron.json") //iron.json in current directory
+
+	//If neither home or local json is found
+	if err_local != nil && err_home != nil{
+		return nil, err_home
 	}
+
 	var config Config
-	err = json.Unmarshal(data, &config)
-	if err != nil {
-		return nil, err
+	if (err_home == nil){
+		err_home = json.Unmarshal(data, &config)
+
+		if(err_home != nil){
+			return nil, err_home
+		}
+	}	
+	if (err_local == nil){
+		err_local = json.Unmarshal(local_data, &config)
+
+		if(err_local != nil){
+			return nil, err_local
+		}
 	}
+
 	return &config, nil
 }
