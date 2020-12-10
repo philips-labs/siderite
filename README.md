@@ -15,6 +15,14 @@ $ cf csk iron siderite
 $ cf service-key iron siderite |tail -n +2 > ~/.iron.json
 ```
 
+# installation
+siderite can be built by cloning this project and running
+```
+go build .
+```
+
+Alternatively, binaries are availble in [releases](https://github.com/philips-labs/siderite/releases)
+
 # usage
 siderite defines the following JSON payload format
 ```json
