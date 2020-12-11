@@ -1,5 +1,5 @@
 # siderite
-siderite is a companion tool to the iron CLI to make the interaction with the HSDP Iron service more pleasant. It can both prepare the payloads for your tasks and also act as a runner in your dockerized workload to interpet the payload.
+siderite is a companion tool to the iron CLI to make the interaction with the HSDP Iron service more pleasant. It can both prepare the payloads for your tasks and also act as a runner in your dockerized workload to interpret the payload.
 
 # requirements
 * IronCLI - https://dev.iron.io/worker/reference/cli/
