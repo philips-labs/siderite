@@ -6,8 +6,15 @@ siderite is a companion tool to the iron CLI to make the interaction with the HS
 * CF CLI - https://docs.cloudfoundry.org/cf-cli/install-go-cli.html
 * Access to HSDP CF
 
+# install siderite binary
+Ensure you have [Go 1.16 or newer](https://golang.org/dl/) installed, then:
+
+```shell
+$ go install github.com/philips-labs/siderite@latest
+```
+
 # configuration
-as a first step you need to have a HSDP Iron instances provisioned through the HSDP Iron broker. The service details of this instance should be in your home folder as `~/.iron.json`. This can be done using the sequence of commands shown below:
+next you need to have a HSDP Iron instances provisioned through the HSDP Iron broker. The service details of this instance should be in your home folder as `~/.iron.json`. This can be done using the sequence of commands shown below:
 
 ```shell
 $ cf cs hsdp-iron dev-large-encrypted iron
