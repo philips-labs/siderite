@@ -36,7 +36,11 @@ func run(cmd *cobra.Command, args []string) {
 
 	worker.ParseFlags()
 	p := &Payload{}
-	worker.PayloadFromJSON(p)
+	err := worker.PayloadFromJSON(p)
+	if err != nil {
+		fmt.Printf("Failed to read payload from JSON: %v", err)
+		return
+	}
 
 	if len(p.Version) < 1 || p.Version != "1" {
 		fmt.Println("[siderite] unsupported or unknown payload version", p.Version)
@@ -46,6 +50,7 @@ func run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	fmt.Printf("executing: %s %v\n", p.Cmd[0], p.Cmd[1:])
 	command := exec.Command(p.Cmd[0], p.Cmd[1:]...)
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
@@ -54,6 +59,7 @@ func run(cmd *cobra.Command, args []string) {
 	for k, v := range p.Env {
 		command.Env = append(command.Env, k+"="+v)
 	}
-	command.Run()
+	err := command.Run()
+	fmt.Printf("result: %v\n", err)
 	fmt.Printf("[siderite] version %s exit\n", GitCommit)
 }
