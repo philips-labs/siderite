@@ -59,7 +59,7 @@ func run(cmd *cobra.Command, args []string) {
 	for k, v := range p.Env {
 		command.Env = append(command.Env, k+"="+v)
 	}
-	err := command.Run()
+	err = command.Run()
 	fmt.Printf("result: %v\n", err)
 	fmt.Printf("[siderite] version %s exit\n", GitCommit)
 }

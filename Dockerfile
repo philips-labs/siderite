@@ -1,4 +1,5 @@
 FROM golang:1.16.0-alpine3.13 as builder
+RUN apk add --no-cache git
 WORKDIR /siderite
 COPY go.mod .
 COPY go.sum .
