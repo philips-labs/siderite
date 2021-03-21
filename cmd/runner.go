@@ -17,7 +17,7 @@ var runnerCmd = &cobra.Command{
 
 this mode should be used inside an IronIO docker task. siderite
 will block until the command exits.`,
-	Run: run,
+	Run: runner(true),
 }
 
 func init() {
@@ -33,34 +33,39 @@ type Payload struct {
 	Upstream string            `json:"upstream,omitempty"`
 }
 
-func run(cmd *cobra.Command, args []string) {
-	fmt.Printf("[siderite] version %s start\n", GitCommit)
+func runner(parseFlags bool) func(cmd *cobra.Command, args []string) {
+	return func(cmd *cobra.Command, args []string) {
+		fmt.Printf("[siderite] version %s start\n", GitCommit)
 
-	p := &Payload{}
-	err := worker.PayloadFromJSON(p)
-	if err != nil {
-		fmt.Printf("Failed to read payload from JSON: %v", err)
-		return
-	}
+		if parseFlags {
+			worker.ParseFlags()
+		}
+		p := &Payload{}
+		err := worker.PayloadFromJSON(p)
+		if err != nil {
+			fmt.Printf("Failed to read payload from JSON: %v", err)
+			return
+		}
 
-	if len(p.Version) < 1 || p.Version != "1" {
-		fmt.Println("[siderite] unsupported or unknown payload version", p.Version)
-	}
-	if len(p.Cmd) < 1 {
-		fmt.Println("[siderite] missing command")
-		os.Exit(1)
-	}
+		if len(p.Version) < 1 || p.Version != "1" {
+			fmt.Println("[siderite] unsupported or unknown payload version", p.Version)
+		}
+		if len(p.Cmd) < 1 {
+			fmt.Println("[siderite] missing command")
+			os.Exit(1)
+		}
 
-	fmt.Printf("executing: %s %v\n", p.Cmd[0], p.Cmd[1:])
-	command := exec.Command(p.Cmd[0], p.Cmd[1:]...)
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-	command.Env = os.Environ()
+		fmt.Printf("executing: %s %v\n", p.Cmd[0], p.Cmd[1:])
+		command := exec.Command(p.Cmd[0], p.Cmd[1:]...)
+		command.Stdout = os.Stdout
+		command.Stderr = os.Stderr
+		command.Env = os.Environ()
 
-	for k, v := range p.Env {
-		command.Env = append(command.Env, k+"="+v)
+		for k, v := range p.Env {
+			command.Env = append(command.Env, k+"="+v)
+		}
+		err = command.Run()
+		fmt.Printf("result: %v\n", err)
+		fmt.Printf("[siderite] version %s exit\n", GitCommit)
 	}
-	err = command.Run()
-	fmt.Printf("result: %v\n", err)
-	fmt.Printf("[siderite] version %s exit\n", GitCommit)
 }
