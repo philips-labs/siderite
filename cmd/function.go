@@ -20,7 +20,6 @@ var functionCmd = &cobra.Command{
 	Short: "Run in function mode",
 	Long:  `Runs siderite in hsdp_functio support mode`,
 	Run: func(cmd *cobra.Command, args []string) {
-		worker.ParseFlags()
 		p := &Payload{}
 		err := worker.PayloadFromJSON(p)
 		if err != nil {

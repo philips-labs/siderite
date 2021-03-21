@@ -36,7 +36,6 @@ type Payload struct {
 func run(cmd *cobra.Command, args []string) {
 	fmt.Printf("[siderite] version %s start\n", GitCommit)
 
-	worker.ParseFlags()
 	p := &Payload{}
 	err := worker.PayloadFromJSON(p)
 	if err != nil {
