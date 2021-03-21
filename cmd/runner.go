@@ -26,9 +26,11 @@ func init() {
 
 // Payload describes the JSON payload file
 type Payload struct {
-	Version string            `json:"version"`
-	Env     map[string]string `json:"env,omitempty"`
-	Cmd     []string          `json:"cmd,omitempty"`
+	Version  string            `json:"version"`
+	Env      map[string]string `json:"env,omitempty"`
+	Cmd      []string          `json:"cmd,omitempty"`
+	Token    string            `json:"token,omitempty"`
+	Upstream string            `json:"upstream,omitempty"`
 }
 
 func run(cmd *cobra.Command, args []string) {
