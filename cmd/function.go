@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -37,9 +38,9 @@ var functionCmd = &cobra.Command{
 		}
 
 		// Start
-		go chiselClient(chiselArgs)
-		time.Sleep(2 * time.Second) // Blunt way of letting chisel bootstrap
-		runner(false)(cmd, args)
+		go runner(false)(cmd, args)
+		waitForPort(30*time.Second, "127.0.0.1:8080")
+		chiselClient(chiselArgs)
 	},
 }
 
@@ -47,6 +48,24 @@ func init() {
 	rootCmd.AddCommand(functionCmd)
 }
 
+func waitForPort(timeout time.Duration, host string) (bool, error) {
+	if timeout == 0 {
+		timeout = time.Duration(1) * time.Minute
+	}
+	until := time.Now().Add(timeout)
+	for {
+		var conn net.Conn
+		conn, _ = net.DialTimeout("tcp", host, timeout)
+		if conn != nil {
+			err := conn.Close()
+			return true, err
+		}
+		time.Sleep(100 * time.Millisecond)
+		if time.Now().After(until) {
+			return false, fmt.Errorf("timed out waiting for %s", host)
+		}
+	}
+}
 func chiselClient(args []string) {
 	//flags := flag.NewFlagSet("client", flag.ContinueOnError)
 	config := chclient.Config{Headers: http.Header{}}
