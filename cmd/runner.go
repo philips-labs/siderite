@@ -29,6 +29,7 @@ type Payload struct {
 	Version  string            `json:"version"`
 	Env      map[string]string `json:"env,omitempty"`
 	Cmd      []string          `json:"cmd,omitempty"`
+	Auth     string            `json:"auth,omitempty"`
 	Token    string            `json:"token,omitempty"`
 	Upstream string            `json:"upstream,omitempty"`
 }

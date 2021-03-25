@@ -36,11 +36,12 @@ var functionCmd = &cobra.Command{
 			fmt.Sprintf("https://%s:4443", p.Upstream),
 			fmt.Sprintf("R:8081:127.0.0.1:8080"),
 		}
+		auth := fmt.Sprintf("chisel:%s", p.Token)
 
 		// Start
 		go runner(false)(cmd, args)
-		waitForPort(30*time.Second, "127.0.0.1:8080")
-		chiselClient(chiselArgs)
+		_, _ = waitForPort(30*time.Second, "127.0.0.1:8080")
+		chiselClient(chiselArgs, auth)
 	},
 }
 
@@ -66,9 +67,12 @@ func waitForPort(timeout time.Duration, host string) (bool, error) {
 		}
 	}
 }
-func chiselClient(args []string) {
+func chiselClient(args []string, auth string) {
 	//flags := flag.NewFlagSet("client", flag.ContinueOnError)
-	config := chclient.Config{Headers: http.Header{}}
+	config := chclient.Config{
+		Headers: http.Header{},
+		Auth:    auth,
+	}
 	/*
 		flags.StringVar(&config.Fingerprint, "fingerprint", "", "")
 		flags.StringVar(&config.Auth, "auth", "", "")
