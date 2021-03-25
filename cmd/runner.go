@@ -32,6 +32,7 @@ type Payload struct {
 	Auth     string            `json:"auth,omitempty"`
 	Token    string            `json:"token,omitempty"`
 	Upstream string            `json:"upstream,omitempty"`
+	Mode     string            `json:"mode,omitempty"`
 }
 
 func runner(parseFlags bool) func(cmd *cobra.Command, args []string) {

@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/iron-io/iron_go3/worker"
@@ -18,7 +20,7 @@ import (
 var functionCmd = &cobra.Command{
 	Use:   "function",
 	Short: "Run in function mode",
-	Long:  `Runs siderite in hsdp_functio support mode`,
+	Long:  `Runs siderite in hsdp_function support mode`,
 	Run: func(cmd *cobra.Command, args []string) {
 		worker.ParseFlags()
 		p := &Payload{}
@@ -31,16 +33,24 @@ var functionCmd = &cobra.Command{
 		if len(p.Version) < 1 || p.Version != "1" {
 			fmt.Println("[siderite] unsupported or unknown payload version", p.Version)
 		}
+		// Start
+		go runner(false)(cmd, args)
+		// Wait for the function to become available
+		_, _ = waitForPort(30*time.Second, "127.0.0.1:8080")
+
+		if p.Mode == "async" {
+			// TODO: call the gateway and pick up the payload and reploy it here
+			http.Post("http://127.0.0.1:8080/", "application/json", ioutil.NopCloser(strings.NewReader("")))
+			// Exit job
+			return
+		}
+
 		// Build chisel connect args
 		chiselArgs := []string{
 			fmt.Sprintf("https://%s:4443", p.Upstream),
 			fmt.Sprintf("R:8081:127.0.0.1:8080"),
 		}
 		auth := fmt.Sprintf("chisel:%s", p.Token)
-
-		// Start
-		go runner(false)(cmd, args)
-		_, _ = waitForPort(30*time.Second, "127.0.0.1:8080")
 		chiselClient(chiselArgs, auth)
 	},
 }
