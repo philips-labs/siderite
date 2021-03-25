@@ -72,7 +72,7 @@ var functionCmd = &cobra.Command{
 			// Replay the request to the function
 			resp, err = client.R().SetHeaders(originalRequest.Headers).
 				SetBody(originalRequest.Body).
-				Post("http://127.0.0.1:8080/" + originalRequest.Path)
+				Post("http://127.0.0.1:8080" + originalRequest.Path)
 			if err != nil {
 				fmt.Printf("Error performing request. Need to recover somehow...\n")
 				_ = syscall.Kill(pid, syscall.SIGTERM)
