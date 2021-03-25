@@ -17,7 +17,7 @@ var runnerCmd = &cobra.Command{
 
 this mode should be used inside an IronIO docker task. siderite
 will block until the command exits.`,
-	Run: runner(true),
+	Run: runner(true, nil),
 }
 
 func init() {
@@ -35,7 +35,7 @@ type Payload struct {
 	Mode     string            `json:"mode,omitempty"`
 }
 
-func runner(parseFlags bool) func(cmd *cobra.Command, args []string) {
+func runner(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		fmt.Printf("[siderite] version %s start\n", GitCommit)
 
@@ -66,7 +66,11 @@ func runner(parseFlags bool) func(cmd *cobra.Command, args []string) {
 		for k, v := range p.Env {
 			command.Env = append(command.Env, k+"="+v)
 		}
-		err = command.Run()
+		_ = command.Start()
+		if c != nil {
+			c <- command.Process.Pid // Send to parent
+		}
+		err = command.Wait()
 		fmt.Printf("result: %v\n", err)
 		fmt.Printf("[siderite] version %s exit\n", GitCommit)
 	}

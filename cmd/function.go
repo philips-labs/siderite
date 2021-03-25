@@ -1,20 +1,28 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"os"
-	"strings"
+	"syscall"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/iron-io/iron_go3/worker"
 	chclient "github.com/jpillora/chisel/client"
 	"github.com/jpillora/chisel/share/cos"
 	"github.com/spf13/cobra"
 )
+
+type request struct {
+	Headers  map[string]string `json:"headers"`
+	Body     string            `json:"body"`
+	Callback string            `json:"callback"`
+	Path     string            `json:"path"`
+}
 
 // functionCmd represents the function command
 var functionCmd = &cobra.Command{
@@ -34,14 +42,45 @@ var functionCmd = &cobra.Command{
 			fmt.Println("[siderite] unsupported or unknown payload version", p.Version)
 		}
 		// Start
-		go runner(false)(cmd, args)
+		c := make(chan int)
+		go runner(false, c)(cmd, args)
 		// Wait for the function to become available
+		pid := <-c
 		_, _ = waitForPort(30*time.Second, "127.0.0.1:8080")
 
+		fmt.Printf("Mode = '%s'\n", p.Mode)
+		fmt.Printf("PID = %d\n", pid)
 		if p.Mode == "async" {
-			// TODO: call the gateway and pick up the payload and reploy it here
-			http.Post("http://127.0.0.1:8080/", "application/json", ioutil.NopCloser(strings.NewReader("")))
-			// Exit job
+			// Retrieve the original request data
+			taskID := os.Getenv("TASK_ID") // Get our task ID
+			client := resty.New()
+			resp, err := client.R().
+				SetHeader("Authorization", fmt.Sprintf("Token %s", p.Token)).
+				Get(fmt.Sprintf("https://%s/payload/%s", p.Upstream, taskID))
+			if err != nil {
+				fmt.Printf("Error retrieving payload. Need to recover somehow...\n")
+				_ = syscall.Kill(pid, syscall.SIGTERM)
+				return
+			}
+			var originalRequest request
+			err = json.Unmarshal(resp.Body(), &originalRequest)
+			if err != nil {
+				fmt.Printf("Error decoding. Need to recover somehow...\n")
+				_ = syscall.Kill(pid, syscall.SIGTERM)
+				return
+			}
+			// Replay the request to the function
+			resp, err = client.R().SetHeaders(originalRequest.Headers).
+				SetBody(originalRequest.Body).
+				Post("http://127.0.0.1:8080/" + originalRequest.Path)
+			if err != nil {
+				fmt.Printf("Error performing request. Need to recover somehow...\n")
+				_ = syscall.Kill(pid, syscall.SIGTERM)
+				return
+			}
+			// Callback with results
+			_, _ = client.R().SetBody(resp.Body()).Post(originalRequest.Callback)
+			_ = syscall.Kill(pid, syscall.SIGTERM)
 			return
 		}
 
@@ -78,29 +117,10 @@ func waitForPort(timeout time.Duration, host string) (bool, error) {
 	}
 }
 func chiselClient(args []string, auth string) {
-	//flags := flag.NewFlagSet("client", flag.ContinueOnError)
 	config := chclient.Config{
 		Headers: http.Header{},
 		Auth:    auth,
 	}
-	/*
-		flags.StringVar(&config.Fingerprint, "fingerprint", "", "")
-		flags.StringVar(&config.Auth, "auth", "", "")
-		flags.DurationVar(&config.KeepAlive, "keepalive", 25*time.Second, "")
-		flags.IntVar(&config.MaxRetryCount, "max-retry-count", -1, "")
-		flags.DurationVar(&config.MaxRetryInterval, "max-retry-interval", 0, "")
-		flags.StringVar(&config.Proxy, "proxy", "", "")
-		flags.StringVar(&config.TLS.CA, "tls-ca", "", "")
-		flags.BoolVar(&config.TLS.SkipVerify, "tls-skip-verify", false, "")
-		flags.StringVar(&config.TLS.Cert, "tls-cert", "", "")
-		flags.StringVar(&config.TLS.Key, "tls-key", "", "")
-		hostname := flags.String("hostname", "", "")
-		pid := flags.Bool("pid", false, "")
-		verbose := flags.Bool("v", false, "")
-		flags.Parse(args)
-		//pull out options, put back remaining args
-		args = flags.Args()
-	*/
 	if len(args) < 2 {
 		log.Fatalf("A server and least one remote is required")
 	}
@@ -110,12 +130,6 @@ func chiselClient(args []string, auth string) {
 	if config.Auth == "" {
 		config.Auth = os.Getenv("AUTH")
 	}
-	//move hostname onto headers
-	/*
-		if *hostname != "" {
-			config.Headers.Set("Host", *hostname)
-		}
-	*/
 	//ready
 	c, err := chclient.NewClient(&config)
 	if err != nil {
