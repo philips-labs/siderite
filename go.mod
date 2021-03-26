@@ -4,14 +4,13 @@ go 1.16
 
 require (
 	github.com/fatih/color v1.10.0
-	github.com/go-resty/resty/v2 v2.5.0 // indirect
+	github.com/go-resty/resty/v2 v2.5.0
 	github.com/iron-io/iron_go3 v0.0.0-20190916120531-a4a7f74b73ac
 	github.com/jeffh/go.bdd v0.0.0-20120717032931-88f798ee0c74 // indirect
 	github.com/jpillora/chisel v1.7.6
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/pkg/errors v0.8.1
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v0.0.7
