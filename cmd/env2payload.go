@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/philips-labs/siderite"
 	"github.com/spf13/cobra"
 )
 
@@ -38,8 +39,8 @@ func contains(s []string, searchterm string) bool {
 	return i < len(s) && s[i] == searchterm
 }
 
-func env2payload(cmd *cobra.Command, args []string) {
-	var payload Payload
+func env2payload(cmd *cobra.Command, _ []string) {
+	var payload siderite.Payload
 
 	payload.Version = "1"
 
@@ -51,7 +52,7 @@ func env2payload(cmd *cobra.Command, args []string) {
 	sort.Strings(exclude)
 
 	if len(include) > 0 && include[0] != "" && len(exclude) > 0 && exclude[0] != "" {
-		fmt.Fprintf(os.Stderr, "can't use include and exclude simultaneously\n")
+		_, _ = fmt.Fprintf(os.Stderr, "can't use include and exclude simultaneously\n")
 		return
 	}
 	envInput := []byte("")
@@ -107,10 +108,10 @@ func env2payload(cmd *cobra.Command, args []string) {
 	}
 	b, err := json.Marshal(payload)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
 	}
 
 	var out bytes.Buffer
-	json.Indent(&out, b, "", "  ")
-	out.WriteTo(os.Stdout)
+	_ = json.Indent(&out, b, "", "  ")
+	_, _ = out.WriteTo(os.Stdout)
 }

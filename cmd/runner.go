@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/iron-io/iron_go3/worker"
+	"github.com/philips-labs/siderite"
 	"github.com/spf13/cobra"
 )
 
@@ -24,17 +25,6 @@ func init() {
 	rootCmd.AddCommand(runnerCmd)
 }
 
-// Payload describes the JSON payload file
-type Payload struct {
-	Version  string            `json:"version"`
-	Env      map[string]string `json:"env,omitempty"`
-	Cmd      []string          `json:"cmd,omitempty"`
-	Auth     string            `json:"auth,omitempty"`
-	Token    string            `json:"token,omitempty"`
-	Upstream string            `json:"upstream,omitempty"`
-	Mode     string            `json:"mode,omitempty"`
-}
-
 func runner(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		fmt.Printf("[siderite] version %s start\n", GitCommit)
@@ -42,7 +32,7 @@ func runner(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string)
 		if parseFlags {
 			worker.ParseFlags()
 		}
-		p := &Payload{}
+		p := &siderite.Payload{}
 		err := worker.PayloadFromJSON(p)
 		if err != nil {
 			fmt.Printf("Failed to read payload from JSON: %v", err)

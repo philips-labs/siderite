@@ -14,6 +14,7 @@ import (
 	"github.com/iron-io/iron_go3/worker"
 	chclient "github.com/jpillora/chisel/client"
 	"github.com/jpillora/chisel/share/cos"
+	"github.com/philips-labs/siderite"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +32,7 @@ var functionCmd = &cobra.Command{
 	Long:  `Runs siderite in hsdp_function support mode`,
 	Run: func(cmd *cobra.Command, args []string) {
 		worker.ParseFlags()
-		p := &Payload{}
+		p := &siderite.Payload{}
 		err := worker.PayloadFromJSON(p)
 		if err != nil {
 			fmt.Printf("Failed to read payload from JSON: %v", err)
