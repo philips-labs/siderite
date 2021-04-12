@@ -44,7 +44,7 @@ var functionCmd = &cobra.Command{
 		}
 		// Start
 		c := make(chan int)
-		go runner(false, c)(cmd, args)
+		go task(false, c)(cmd, args)
 		// Wait for the function to become available
 		pid := <-c
 		_, _ = waitForPort(30*time.Second, "127.0.0.1:8080")

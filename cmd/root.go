@@ -12,7 +12,7 @@ import (
 
 var cfgFile string
 
-var GitCommit = "deadbeaf"
+var GitCommit = "deadbeef"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 the interaction with HSDP IronIO more pleasant:
 
 siderite supports encrypting payloads using the cluster public key, implements
-a runner mode which you can set up as the ENTRYPOINT for your Docker
+a task mode which you can set up as the ENTRYPOINT for your Docker
 image. You can use it to prepare a JSON format payload which allows you to easily
 define the command and environment which should run as a Iron task. Finally
 it contains a doctor command which verifies your environment is set up correctly

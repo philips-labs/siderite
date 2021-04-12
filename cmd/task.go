@@ -10,22 +10,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// runnerCmd represents the runner command
-var runnerCmd = &cobra.Command{
-	Use:   "runner",
-	Short: "runs command described in payload",
+// taskCmd represents the task command
+var taskCmd = &cobra.Command{
+	Use:     "task",
+	Aliases: []string{"runner"},
+	Short:   "runs command described in payload",
 	Long: `runs the command provided in the payload file.
 
 this mode should be used inside an IronIO docker task. siderite
 will block until the command exits.`,
-	Run: runner(true, nil),
+	Run: task(true, nil),
 }
 
 func init() {
-	rootCmd.AddCommand(runnerCmd)
+	rootCmd.AddCommand(taskCmd)
 }
 
-func runner(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
+func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
 		fmt.Printf("[siderite] version %s start\n", GitCommit)
 
