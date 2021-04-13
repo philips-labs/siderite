@@ -41,12 +41,12 @@ jobs:
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
       -
-        name: Build and push centos7
-        id: docker_build
+        name: Build and push debian
+        id: docker_build_debian
         uses: docker/build-push-action@v2
         with:
           context: ./
-          file: ./Dockerfile.centos7
+          file: ./Dockerfile.debian
           platforms: linux/amd64,linux/arm64
           push: true
           tags: philipslabs/siderite:latest-debian
