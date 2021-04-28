@@ -42,5 +42,15 @@ jobs:
           push: true
           tags: philipslabs/siderite:${{ steps.vars.outputs.tag }}
       -
+        name: Build and push debian
+        id: docker_build_debian
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile.debian
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: philipslabs/siderite:debian-${{ steps.vars.outputs.tag }}  
+      -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
