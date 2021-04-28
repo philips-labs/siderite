@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -36,7 +37,13 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 		p := &siderite.Payload{}
 		err := worker.PayloadFromJSON(p)
 		if err != nil {
-			fmt.Printf("Failed to read payload from JSON: %v", err)
+			fmt.Printf("Failed to read payload from JSON: %v\n", err)
+			fmt.Printf("Environment:\n%v\n", os.Environ())
+			cmd := exec.Command("mount")
+			var out bytes.Buffer
+			cmd.Stdout = &out
+			cmd.Run()
+			fmt.Printf("Mount:\n%s\n", out.String())
 			return
 		}
 
