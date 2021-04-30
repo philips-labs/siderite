@@ -16,5 +16,6 @@ type Payload struct {
 type CronPayload struct {
 	Schedule         string `json:"schedule"`
 	EncryptedPayload string `json:"encrypted_payload"`
+	Type             string `json:"type,omitempty"`
 	Timeout          int    `json:"timeout,omitempty"`
 }
