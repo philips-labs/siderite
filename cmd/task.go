@@ -7,7 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/iron-io/iron_go3/worker"
-	"github.com/philips-labs/siderite"
+	"github.com/philips-labs/siderite/models"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +34,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 		if parseFlags {
 			worker.ParseFlags()
 		}
-		p := &siderite.Payload{}
+		p := &models.Payload{}
 		err := worker.PayloadFromJSON(p)
 		if err != nil {
 			fmt.Printf("Failed to read payload from JSON: %v\n", err)
@@ -42,7 +42,10 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 			cmd := exec.Command("mount")
 			var out bytes.Buffer
 			cmd.Stdout = &out
-			cmd.Run()
+			err = cmd.Run()
+			if err != nil {
+				fmt.Printf("[siderite] error running: %v\n", err)
+			}
 			fmt.Printf("Mount:\n%s\n", out.String())
 			return
 		}
