@@ -1,4 +1,4 @@
-package siderite
+package models
 
 // Payload describes the siderite payload format
 type Payload struct {

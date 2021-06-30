@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/philips-labs/siderite"
+	"github.com/philips-labs/siderite/models"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +40,7 @@ func contains(s []string, searchterm string) bool {
 }
 
 func env2payload(cmd *cobra.Command, _ []string) {
-	var payload siderite.Payload
+	var payload models.Payload
 
 	payload.Version = "1"
 
