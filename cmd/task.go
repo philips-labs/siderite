@@ -70,7 +70,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 			}()
 		}
 
-		fmt.Printf("[siderite] version %s start\n", GitCommit)
+		fmt.Fprintf(os.Stdout, "[siderite] task version %s start\n", GitCommit)
 
 		if parseFlags {
 			worker.ParseFlags()
