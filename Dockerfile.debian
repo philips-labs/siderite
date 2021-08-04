@@ -1,4 +1,6 @@
+ARG GIT_COMMIT=unknown
 FROM golang:1.16.6-buster as builder
+ARG GIT_COMMIT
 WORKDIR /siderite
 COPY go.mod .
 COPY go.sum .
@@ -8,9 +10,7 @@ RUN go mod download
 
 # Build
 COPY . .
-RUN git rev-parse --short HEAD
-RUN GIT_COMMIT=$(git rev-parse --short HEAD) && \
-	go build -ldflags "-X siderite/cmd.GitCommit=${GIT_COMMIT}" -o siderite .
+RUN GIT_COMMIT=$GIT_COMMIT go build -ldflags "-X github.com/philips-labs/siderite/cmd.GitCommit=${GIT_COMMIT}"
 
 FROM golang:1.16.6-buster
 LABEL maintainer="andy.lo-a-foe@philips.com"
