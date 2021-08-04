@@ -11,7 +11,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/logging"
 )
 
-func LogToHSDP(fd *os.File, template logging.Resource, done chan bool) error {
+func ToHSDP(fd *os.File, template logging.Resource, done chan bool) error {
 	client, err := logging.NewClient(http.DefaultClient, &logging.Config{
 		SharedKey:    os.Getenv("SIDERITE_LOGGING_SHARED_KEY"),
 		SharedSecret: os.Getenv("SIDERITE_LOGGING_SHARED_SECRET"),

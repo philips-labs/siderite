@@ -45,7 +45,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 		}
 		os.Stdout = w
 
-		err = logger.LogToHSDP(r, logging.Resource{
+		err = logger.ToHSDP(r, logging.Resource{
 			ApplicationInstance: uuid.New().String(),
 			EventID:             "1",
 			ApplicationName:     "hsdp_function",
