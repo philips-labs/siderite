@@ -58,14 +58,15 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 			ServiceName:         taskID,
 		}, done)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stdout, "Not logging to HSDP: %v\n", err)
+			_, _ = fmt.Fprintf(os.Stdout, "[siderite] not logging to HSDP: %v\n", err)
 			os.Stdout = old
 		} else {
+			_, _ = fmt.Fprintf(os.Stdout, "[siderite] logging stdout to HSDP logging\n")
 			defer func() {
-				done <- true
 				os.Stdout = old
 				fmt.Printf("flushing logs\n")
 				time.Sleep(3 * time.Second)
+				done <- true
 			}()
 		}
 

@@ -33,11 +33,13 @@ func ToHSDP(fd *os.File, template logging.Resource, done chan bool) error {
 			template.LogData.Message = text
 			template.LogTime = time.Now().Format("2006-01-02T15:04:05.000Z07:00")
 
-			resp, err := client.StoreResources([]logging.Resource{
-				template,
-			}, 1)
-			if err != nil {
-				_, _ = fmt.Fprintf(os.Stderr, "error storing: %v [%v]\n", err, resp)
+			if text != "" {
+				resp, err := client.StoreResources([]logging.Resource{
+					template,
+				}, 1)
+				if err != nil {
+					_, _ = fmt.Fprintf(os.Stderr, "error storing: %v [%v]\n", err, resp)
+				}
 			}
 			// Check if we should exit
 			select {
