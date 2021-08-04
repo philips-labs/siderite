@@ -76,7 +76,6 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 				os.Stdout = old
 				fmt.Printf("flushing logs\n")
 				time.Sleep(3 * time.Second)
-				done <- true
 			}()
 		}
 

@@ -80,7 +80,6 @@ var functionCmd = &cobra.Command{
 				os.Stdout = old
 				fmt.Printf("flushing logs\n")
 				time.Sleep(3 * time.Second)
-				done <- true
 			}()
 		}
 
