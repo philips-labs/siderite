@@ -58,8 +58,8 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 			ServiceName:         taskID,
 		}, done)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stdout, "[siderite] not logging to HSDP: %v\n", err)
 			os.Stdout = old
+			_, _ = fmt.Fprintf(os.Stdout, "[siderite] not logging to HSDP: %v\n", err)
 		} else {
 			_, _ = fmt.Fprintf(os.Stdout, "[siderite] logging stdout to HSDP logging\n")
 			defer func() {
@@ -70,7 +70,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 			}()
 		}
 
-		fmt.Fprintf(os.Stdout, "[siderite] task version %s start\n", GitCommit)
+		_, _ = fmt.Fprintf(os.Stdout, "[siderite] task version %s start\n", GitCommit)
 
 		if parseFlags {
 			worker.ParseFlags()

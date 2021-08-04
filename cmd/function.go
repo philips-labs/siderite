@@ -60,8 +60,8 @@ var functionCmd = &cobra.Command{
 			ServiceName:         taskID,
 		}, done)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stdout, "[siderite] not logging to HSDP: %v\n", err)
 			os.Stdout = old
+			_, _ = fmt.Fprintf(os.Stdout, "[siderite] not logging to HSDP: %v\n", err)
 		} else {
 			_, _ = fmt.Fprintf(os.Stdout, "[siderite] logging stdout to HSDP logging\n")
 			defer func() {
@@ -72,7 +72,7 @@ var functionCmd = &cobra.Command{
 			}()
 		}
 
-		fmt.Fprintf(os.Stdout, "[siderite] function version %s start\n", GitCommit)
+		_, _ = fmt.Fprintf(os.Stdout, "[siderite] function version %s start\n", GitCommit)
 
 		worker.ParseFlags()
 		p := &models.Payload{}
