@@ -34,6 +34,11 @@ jobs:
           # We must fetch at least the immediate parents so that if this is
           # a pull request then we can checkout the head.
           fetch-depth: 2
+      - name: Git information
+        id: vars
+        shell: bash
+        run: |
+          echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       -
         name: Build and push alpine
         id: docker_build
@@ -54,6 +59,7 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile.debian
+          build_args: GIT_COMMIT=${{ steps.vars.outputs.sha_short }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: philipslabs/siderite:latest-debian,docker.na1.hsdp.io/philipslabs/siderite:latest-debian
