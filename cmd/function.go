@@ -11,10 +11,13 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/google/uuid"
 	"github.com/iron-io/iron_go3/worker"
 	chclient "github.com/jpillora/chisel/client"
 	"github.com/jpillora/chisel/share/cos"
+	"github.com/philips-labs/siderite/logger"
 	"github.com/philips-labs/siderite/models"
+	"github.com/philips-software/go-hsdp-api/logging"
 	"github.com/spf13/cobra"
 )
 
@@ -31,16 +34,53 @@ var functionCmd = &cobra.Command{
 	Short: "Run in function mode",
 	Long:  `Runs siderite in hsdp_function support mode`,
 	Run: func(cmd *cobra.Command, args []string) {
+		taskID := os.Getenv("TASK_ID") // Get our task ID
+		if taskID == "" {
+			taskID = "local"
+		}
+		done := make(chan bool)
+		old := os.Stdout // keep backup of the real stdout
+		r, w, err := os.Pipe()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stdout, "Error setting up pipe: %v\n", err)
+			return
+		}
+		os.Stdout = w
+
+		err = logger.LogToHSDP(r, logging.Resource{
+			ApplicationInstance: uuid.New().String(),
+			EventID:             "1",
+			ApplicationName:     "hsdp_function",
+			ApplicationVersion:  "1.0.0",
+			Component:           "siderite",
+			Category:            "FunctionLog",
+			Severity:            "info",
+			OriginatingUser:     "siderite",
+			ServerName:          "iron.io",
+			ServiceName:         taskID,
+		}, done)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stdout, "Not logging to HSDP: %v\n", err)
+			os.Stdout = old
+		} else {
+			defer func() {
+				done <- true
+				os.Stdout = old
+				fmt.Printf("flushing logs\n")
+				time.Sleep(3 * time.Second)
+			}()
+		}
+
 		worker.ParseFlags()
 		p := &models.Payload{}
-		err := worker.PayloadFromJSON(p)
+		err = worker.PayloadFromJSON(p)
 		if err != nil {
-			fmt.Printf("Failed to read payload from JSON: %v", err)
+			fmt.Printf("Failed to read payload from JSON: %v\n", err)
 			return
 		}
 
 		if len(p.Version) < 1 || p.Version != "1" {
-			fmt.Println("[siderite] unsupported or unknown payload version", p.Version)
+			fmt.Printf("[siderite] unsupported or unknown payload version: %v\n", p.Version)
 		}
 		// Start
 		c := make(chan int)
@@ -53,7 +93,6 @@ var functionCmd = &cobra.Command{
 		fmt.Printf("PID = %d\n", pid)
 		if p.Mode == "async" {
 			// Retrieve the original request data
-			taskID := os.Getenv("TASK_ID") // Get our task ID
 			client := resty.New()
 			resp, err := client.R().
 				SetHeader("Authorization", fmt.Sprintf("Token %s", p.Token)).

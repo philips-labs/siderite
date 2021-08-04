@@ -41,6 +41,16 @@ siderite defines the following JSON payload format
 | cmd | []string | command to execute, array string | Y| `["df", "-h"]` |
 | env | hashmap | hash with environment variables | N | `{"foo": "bar"}` |
 
+## logging
+The siderite binary supports direct logging to HSDP logging when the following environment variables
+are set:
+
+| environment | description |
+|-------------|-------------|
+| SIDERITE_LOGGING_PRODUCT_KEY| The HSDP logging product key |
+| SIDERITE_LOGGING_SHARED_KEY | The HSDP logging shared key |
+| SIDERITE_LOGGING_SHARED_SECRET | The HSDP logging shared secret |
+| SIDERITE_LOGGING_BASE_URL | The HSDP logging base URL |
 
 # commands
 
@@ -123,8 +133,9 @@ cf ssh app -c env | siderite env2payload > payload.json
   "cmd": ["java", "-jar", "/data/app.jar"],
   "env": {
     "VCAP_SERVICES": "[REDACTED]",
-	"VCAP_APPLICATION": "[REDACTED]",
-	"ADD_MORE_STUFF": "here"
+    "VCAP_APPLICATION": "[REDACTED]",
+    "ADD_MORE_STUFF": "here"
+  }
 }
 ```
 

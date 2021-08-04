@@ -1,13 +1,16 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/iron-io/iron_go3/worker"
+	"github.com/philips-labs/siderite/logger"
 	"github.com/philips-labs/siderite/models"
+	"github.com/philips-software/go-hsdp-api/logging"
 	"github.com/spf13/cobra"
 )
 
@@ -29,33 +32,61 @@ func init() {
 
 func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
+		taskID := os.Getenv("TASK_ID") // Get our task ID
+		if taskID == "" {
+			taskID = "local"
+		}
+		done := make(chan bool)
+		old := os.Stdout // keep backup of the real stdout
+		r, w, err := os.Pipe()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stdout, "Error setting up pipe: %v\n", err)
+			return
+		}
+		os.Stdout = w
+
+		err = logger.LogToHSDP(r, logging.Resource{
+			ApplicationInstance: uuid.New().String(),
+			EventID:             "1",
+			ApplicationName:     "hsdp_function",
+			ApplicationVersion:  "1.0.0",
+			Component:           "siderite",
+			Category:            "TaskLog",
+			Severity:            "info",
+			OriginatingUser:     "siderite",
+			ServerName:          "iron.io",
+			ServiceName:         taskID,
+		}, done)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stdout, "Not logging to HSDP: %v\n", err)
+			os.Stdout = old
+		} else {
+			defer func() {
+				done <- true
+				os.Stdout = old
+				fmt.Printf("flushing logs\n")
+				time.Sleep(3 * time.Second)
+			}()
+		}
+
 		fmt.Printf("[siderite] version %s start\n", GitCommit)
 
 		if parseFlags {
 			worker.ParseFlags()
 		}
 		p := &models.Payload{}
-		err := worker.PayloadFromJSON(p)
+		err = worker.PayloadFromJSON(p)
 		if err != nil {
 			fmt.Printf("Failed to read payload from JSON: %v\n", err)
-			fmt.Printf("Environment:\n%v\n", os.Environ())
-			cmd := exec.Command("mount")
-			var out bytes.Buffer
-			cmd.Stdout = &out
-			err = cmd.Run()
-			if err != nil {
-				fmt.Printf("[siderite] error running: %v\n", err)
-			}
-			fmt.Printf("Mount:\n%s\n", out.String())
 			return
 		}
 
 		if len(p.Version) < 1 || p.Version != "1" {
-			fmt.Println("[siderite] unsupported or unknown payload version", p.Version)
+			fmt.Printf("[siderite] unsupported or unknown payload version: %s\n", p.Version)
 		}
 		if len(p.Cmd) < 1 {
-			fmt.Println("[siderite] missing command")
-			os.Exit(1)
+			fmt.Printf("[siderite] missing command\n")
+			return
 		}
 
 		fmt.Printf("executing: %s %v\n", p.Cmd[0], p.Cmd[1:])
