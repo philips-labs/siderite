@@ -1,4 +1,6 @@
+ARG GIT_COMMIT=unknown
 FROM golang:1.16.6-alpine3.13 as builder
+ARG GIT_COMMIT
 RUN apk add --no-cache git
 WORKDIR /siderite
 COPY go.mod .
@@ -9,11 +11,9 @@ RUN go mod download
 
 # Build
 COPY . .
-RUN git rev-parse --short HEAD
-RUN GIT_COMMIT=$(git rev-parse --short HEAD) && \
-	go build -ldflags "-X siderite/cmd.GitCommit=${GIT_COMMIT}" -o siderite .
+RUN GIT_COMMIT=$GIT_COMMIT go build -ldflags "-X github.com/philips-labs/siderite/cmd.GitCommit=${GIT_COMMIT}"
 
-FROM golang:1.16.6-alpine3.13
+FROM golang:1.16.0-alpine3.13
 LABEL maintainer="andy.lo-a-foe@philips.com"
 WORKDIR /app
 COPY --from=builder /siderite/siderite /app
