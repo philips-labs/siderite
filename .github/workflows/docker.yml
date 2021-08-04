@@ -59,7 +59,8 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile.debian
-          build-args: GIT_COMMIT=${{ steps.vars.outputs.sha_short }}
+          build-args: |
+            GIT_COMMIT=${{ steps.vars.outputs.sha_short }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: philipslabs/siderite:latest-debian,docker.na1.hsdp.io/philipslabs/siderite:latest-debian
