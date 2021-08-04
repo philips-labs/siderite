@@ -32,6 +32,16 @@ func init() {
 
 func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 	return func(cmd *cobra.Command, args []string) {
+		if parseFlags {
+			worker.ParseFlags()
+		}
+		p := &models.Payload{}
+		err := worker.PayloadFromJSON(p)
+		if err != nil {
+			fmt.Printf("[siderite] failed to read payload from JSON: %v\n", err)
+			return
+		}
+
 		taskID := os.Getenv("TASK_ID") // Get our task ID
 		if taskID == "" {
 			taskID = "local"
@@ -45,7 +55,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 		}
 		os.Stdout = w
 
-		err = logger.ToHSDP(r, logging.Resource{
+		err = logger.ToHSDP(r, p.Env, logging.Resource{
 			ApplicationInstance: uuid.New().String(),
 			EventID:             "1",
 			ApplicationName:     "hsdp_function",
@@ -71,16 +81,6 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) {
 		}
 
 		_, _ = fmt.Fprintf(os.Stdout, "[siderite] task version %s start\n", GitCommit)
-
-		if parseFlags {
-			worker.ParseFlags()
-		}
-		p := &models.Payload{}
-		err = worker.PayloadFromJSON(p)
-		if err != nil {
-			fmt.Printf("Failed to read payload from JSON: %v\n", err)
-			return
-		}
 
 		if len(p.Version) < 1 || p.Version != "1" {
 			fmt.Printf("[siderite] unsupported or unknown payload version: %s\n", p.Version)

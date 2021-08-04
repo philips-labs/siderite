@@ -3,7 +3,6 @@ package logger
 import (
 	"bufio"
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
@@ -11,12 +10,12 @@ import (
 	"github.com/philips-software/go-hsdp-api/logging"
 )
 
-func ToHSDP(fd *os.File, template logging.Resource, done chan bool) error {
-	client, err := logging.NewClient(http.DefaultClient, &logging.Config{
-		SharedKey:    os.Getenv("SIDERITE_LOGGING_SHARED_KEY"),
-		SharedSecret: os.Getenv("SIDERITE_LOGGING_SHARED_SECRET"),
-		BaseURL:      os.Getenv("SIDERITE_LOGGING_BASE_URL"),
-		ProductKey:   os.Getenv("SIDERITE_LOGGING_PRODUCT_KEY"),
+func ToHSDP(fd *os.File, env map[string]string, template logging.Resource, done chan bool) error {
+	client, err := logging.NewClient(nil, &logging.Config{
+		SharedKey:    env["SIDERITE_LOGGING_SHARED_KEY"],
+		SharedSecret: env["SIDERITE_LOGGING_SHARED_SECRET"],
+		BaseURL:      env["SIDERITE_LOGGING_BASE_URL"],
+		ProductKey:   env["SIDERITE_LOGGING_PRODUCT_KEY"],
 	})
 	if err != nil {
 		return err

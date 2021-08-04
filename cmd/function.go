@@ -34,6 +34,18 @@ var functionCmd = &cobra.Command{
 	Short: "Run in function mode",
 	Long:  `Runs siderite in hsdp_function support mode`,
 	Run: func(cmd *cobra.Command, args []string) {
+		worker.ParseFlags()
+		p := &models.Payload{}
+		err := worker.PayloadFromJSON(p)
+		if err != nil {
+			fmt.Printf("Failed to read payload from JSON: %v\n", err)
+			return
+		}
+
+		if len(p.Version) < 1 || p.Version != "1" {
+			fmt.Printf("[siderite] unsupported or unknown payload version: %v\n", p.Version)
+		}
+
 		taskID := os.Getenv("TASK_ID") // Get our task ID
 		if taskID == "" {
 			taskID = "local"
@@ -47,7 +59,7 @@ var functionCmd = &cobra.Command{
 		}
 		os.Stdout = w
 
-		err = logger.ToHSDP(r, logging.Resource{
+		err = logger.ToHSDP(r, p.Env, logging.Resource{
 			ApplicationInstance: uuid.New().String(),
 			EventID:             "1",
 			ApplicationName:     "hsdp_function",
@@ -74,17 +86,6 @@ var functionCmd = &cobra.Command{
 
 		_, _ = fmt.Fprintf(os.Stdout, "[siderite] function version %s start\n", GitCommit)
 
-		worker.ParseFlags()
-		p := &models.Payload{}
-		err = worker.PayloadFromJSON(p)
-		if err != nil {
-			fmt.Printf("Failed to read payload from JSON: %v\n", err)
-			return
-		}
-
-		if len(p.Version) < 1 || p.Version != "1" {
-			fmt.Printf("[siderite] unsupported or unknown payload version: %v\n", p.Version)
-		}
 		// Start
 		c := make(chan int)
 		go task(false, c)(cmd, args)
