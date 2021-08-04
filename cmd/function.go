@@ -99,14 +99,14 @@ var functionCmd = &cobra.Command{
 				Get(fmt.Sprintf("https://%s/payload/%s", p.Upstream, taskID))
 			if err != nil {
 				fmt.Printf("Error retrieving payload. Need to recover somehow...\n")
-				_ = syscall.Kill(pid, syscall.SIGTERM)
+				_ = kill(pid, syscall.SIGTERM)
 				return
 			}
 			var originalRequest request
 			err = json.Unmarshal(resp.Body(), &originalRequest)
 			if err != nil {
 				fmt.Printf("Error decoding. Need to recover somehow...\n")
-				_ = syscall.Kill(pid, syscall.SIGTERM)
+				_ = kill(pid, syscall.SIGTERM)
 				return
 			}
 			// Replay the request to the function
@@ -115,12 +115,12 @@ var functionCmd = &cobra.Command{
 				Post("http://127.0.0.1:8080" + originalRequest.Path)
 			if err != nil {
 				fmt.Printf("Error performing request. Need to recover somehow...\n")
-				_ = syscall.Kill(pid, syscall.SIGTERM)
+				_ = kill(pid, syscall.SIGTERM)
 				return
 			}
 			// Callback with results
 			_, _ = client.R().SetBody(resp.Body()).Post(originalRequest.Callback)
-			_ = syscall.Kill(pid, syscall.SIGTERM)
+			_ = kill(pid, syscall.SIGTERM)
 			return
 		}
 
@@ -132,6 +132,14 @@ var functionCmd = &cobra.Command{
 		auth := fmt.Sprintf("chisel:%s", p.Token)
 		chiselClient(chiselArgs, auth)
 	},
+}
+
+func kill(pid int, sig os.Signal) error {
+	p, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	return p.Signal(sig)
 }
 
 func init() {
