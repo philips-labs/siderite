@@ -47,10 +47,10 @@ are set:
 
 | environment | description |
 |-------------|-------------|
-| SIDERITE_LOGGING_PRODUCT_KEY| The HSDP logging product key |
-| SIDERITE_LOGGING_SHARED_KEY | The HSDP logging shared key |
-| SIDERITE_LOGGING_SHARED_SECRET | The HSDP logging shared secret |
-| SIDERITE_LOGGING_BASE_URL | The HSDP logging base URL |
+| SIDERITE_LOGINGESTOR_PRODUCT_KEY| The HSDP logging product key |
+| SIDERITE_LOGINGESTOR_KEY | The HSDP logging shared key |
+| SIDERITE_LOGINGESTOR_SECRET | The HSDP logging shared secret |
+| SIDERITE_LOGINGESTOR_URL | The HSDP logging base URL |
 
 # commands
 

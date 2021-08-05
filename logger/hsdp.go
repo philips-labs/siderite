@@ -12,10 +12,10 @@ import (
 
 func ToHSDP(fd *os.File, env map[string]string, template logging.Resource, done chan bool) error {
 	client, err := logging.NewClient(nil, &logging.Config{
-		SharedKey:    env["SIDERITE_LOGGING_SHARED_KEY"],
-		SharedSecret: env["SIDERITE_LOGGING_SHARED_SECRET"],
-		BaseURL:      env["SIDERITE_LOGGING_BASE_URL"],
-		ProductKey:   env["SIDERITE_LOGGING_PRODUCT_KEY"],
+		SharedKey:    env["SIDERITE_LOGINGESTOR_KEY"],
+		SharedSecret: env["SIDERITE_LOGINGESTOR_SECRET"],
+		BaseURL:      env["SIDERITE_LOGINGESTOR_URL"],
+		ProductKey:   env["SIDERITE_LOGINGESTOR_PRODUCT_KEY"],
 	})
 	if err != nil {
 		return err
