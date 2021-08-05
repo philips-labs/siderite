@@ -147,10 +147,12 @@ cat payload.json |siderite encrypt > payload.enc
 
 ### 8. create Docker image and push to private repo
 
-> Dockerfile
+:triangular_flag_on_post: Below is an example only. Do not use Java8, it is obsolete! 
+
+> [Dockerfile](https://github.com/philips-labs/siderite-java8)
 
 ```Dockerfile
-FROM loafoe/siderite-java8:latest
+FROM loafoe/siderite-java8:v0.11.0
 
 RUN mkdir -p /data
 ADD app.jar /data
