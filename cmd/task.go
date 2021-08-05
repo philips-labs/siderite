@@ -26,6 +26,14 @@ will block until the command exits.`,
 	Run: task(true, nil),
 }
 
+func kill(pid int, sig os.Signal) error {
+	p, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	return p.Signal(sig)
+}
+
 func init() {
 	rootCmd.AddCommand(taskCmd)
 }

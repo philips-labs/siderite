@@ -1,3 +1,5 @@
+// +build !windows
+
 package cmd
 
 import (
@@ -135,14 +137,6 @@ var functionCmd = &cobra.Command{
 		auth := fmt.Sprintf("chisel:%s", p.Token)
 		chiselClient(chiselArgs, auth)
 	},
-}
-
-func kill(pid int, sig os.Signal) error {
-	p, err := os.FindProcess(pid)
-	if err != nil {
-		return err
-	}
-	return p.Signal(sig)
 }
 
 func init() {
