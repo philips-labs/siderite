@@ -1,3 +1,4 @@
+//go:build !windows
 // +build !windows
 
 package cmd
@@ -92,8 +93,9 @@ var functionCmd = &cobra.Command{
 		go task(false, c)(cmd, args)
 		// Wait for the function to become available
 		pid := <-c
-		_, _ = waitForPort(30*time.Second, "127.0.0.1:8080")
-
+		_, _ = fmt.Fprintf(os.Stdout, "[siderite] waiting for application to become available on 127.0.0.1:8080\n")
+		waitOk, err := waitForPort(30*time.Second, "127.0.0.1:8080")
+		fmt.Printf("waitOk = %v, err = %v\n", waitOk, err)
 		fmt.Printf("Mode = '%s'\n", p.Mode)
 		fmt.Printf("PID = %d\n", pid)
 		if p.Mode == "async" {
@@ -130,9 +132,12 @@ var functionCmd = &cobra.Command{
 		}
 
 		// Build chisel connect args
+		server := fmt.Sprintf("https://%s:4443", p.Upstream)
+		remote := "R:8081:127.0.0.1:8080"
+		fmt.Printf("[siderite] setting up reverse tunnel: %s %s\n", server, remote)
 		chiselArgs := []string{
-			fmt.Sprintf("https://%s:4443", p.Upstream),
-			fmt.Sprintf("R:8081:127.0.0.1:8080"),
+			server,
+			remote,
 		}
 		auth := fmt.Sprintf("chisel:%s", p.Token)
 		chiselClient(chiselArgs, auth)
@@ -180,6 +185,7 @@ func chiselClient(args []string, auth string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	c.Debug = true
 	/*
 		c.Debug = *verbose
 		if *pid {
