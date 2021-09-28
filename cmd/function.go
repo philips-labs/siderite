@@ -140,7 +140,21 @@ var functionCmd = &cobra.Command{
 			remote,
 		}
 		auth := fmt.Sprintf("chisel:%s", p.Token)
-		chiselClient(chiselArgs, auth)
+		client, err := chiselClient(chiselArgs, auth)
+		if err != nil {
+			fmt.Printf("[siderite] error creating chisel client: %v\n", err)
+			return
+		}
+		go cos.GoStats()
+		ctx := cos.InterruptContext()
+		if err := client.Start(ctx); err != nil {
+			fmt.Printf("[siderite] error starting chisel client: %v\n", err)
+			return
+		}
+		fmt.Printf("[siderite] chisel client running. waiting...\n")
+		if err := client.Wait(); err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
@@ -166,13 +180,13 @@ func waitForPort(timeout time.Duration, host string) (bool, error) {
 		}
 	}
 }
-func chiselClient(args []string, auth string) {
+func chiselClient(args []string, auth string) (*chclient.Client, error) {
 	config := chclient.Config{
 		Headers: http.Header{},
 		Auth:    auth,
 	}
 	if len(args) < 2 {
-		log.Fatalf("A server and least one remote is required")
+		return nil, fmt.Errorf("a server and least one remote is required")
 	}
 	config.Server = args[0]
 	config.Remotes = args[1:]
@@ -183,21 +197,8 @@ func chiselClient(args []string, auth string) {
 	//ready
 	c, err := chclient.NewClient(&config)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	c.Debug = true
-	/*
-		c.Debug = *verbose
-		if *pid {
-			//generatePidFile()
-		}
-	*/
-	go cos.GoStats()
-	ctx := cos.InterruptContext()
-	if err := c.Start(ctx); err != nil {
-		log.Fatal(err)
-	}
-	if err := c.Wait(); err != nil {
-		log.Fatal(err)
-	}
+	return c, nil
 }
