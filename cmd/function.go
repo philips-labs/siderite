@@ -126,7 +126,15 @@ var functionCmd = &cobra.Command{
 				return
 			}
 			// Callback with results
-			_, _ = client.R().SetBody(resp.Body()).Post(originalRequest.Callback)
+			fmt.Printf("[siderite] posting result to callback URL: %s\n", originalRequest.Callback)
+			resp, err = client.R().SetBody(resp.Body()).Post(originalRequest.Callback)
+			if err != nil {
+				fmt.Printf("[siderite] callback error: %v\n", err)
+			}
+			if resp != nil {
+				fmt.Printf("[siderite] callback statusCode: %d\n", resp.StatusCode())
+			}
+			fmt.Printf("[siderite] sending SIGTERM to myself\n")
 			_ = kill(pid, syscall.SIGTERM)
 			return
 		}
