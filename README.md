@@ -89,6 +89,10 @@ $ echo 'FOO=BAR'|siderite env2payload -c "echo","\$FOO"
 ## runner
 opens the payload file references by `PAYLOAD_FILE` environment and executes the command, mapping all output to stdout. This mode should be used as the `ENTRYPOINT` command in your Docker image
 
+## task and function
+
+The siderite binary also acts as the entrypoint / command for [hsdp_function](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/guides/functions) compatible Docker images. 
+
 # example usage
 
 ## converting a CF Java8 app to an IronIO scheduled task
