@@ -10,7 +10,7 @@ require (
 	github.com/jeffh/go.bdd v0.0.0-20120717032931-88f798ee0c74 // indirect
 	github.com/jpillora/chisel v1.7.6
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/philips-software/go-hsdp-api v0.47.0
+	github.com/philips-software/go-hsdp-api v0.48.2
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v0.0.7
 	github.com/spf13/viper v1.9.0
