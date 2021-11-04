@@ -5,27 +5,30 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/philips-labs/siderite/iron"
+	config "github.com/philips-labs/siderite/iron"
+	"github.com/philips-software/go-hsdp-api/iron"
 
 	"github.com/spf13/cobra"
 )
 
-// encryptCmd represents the encrypt command
-var encryptCmd = &cobra.Command{
-	Use:   "encrypt",
-	Short: "encrypts input with the cluster public key",
-	Long:  `encrypts input (stdin or file) using the cluster public key`,
-	Run:   encrypt,
+func NewEncryptCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "encrypt",
+		Short: "encrypts input with the cluster public key",
+		Long:  `encrypts input (stdin or file) using the cluster public key`,
+		RunE:  encrypt,
+	}
 }
 
 func init() {
-	rootCmd.AddCommand(encryptCmd)
+	cmd := NewEncryptCmd()
+	rootCmd.AddCommand(cmd)
 
-	encryptCmd.Flags().StringP("keyfile", "k", "", "public key. Looks in ~/.iron.json otherwise")
-	encryptCmd.Flags().StringP("infile", "i", "", "input file. Default is standard input")
+	cmd.Flags().StringP("keyfile", "k", "", "public key. Looks in ~/.iron.json otherwise")
+	cmd.Flags().StringP("infile", "i", "", "input file. Default is standard input")
 }
 
-func encrypt(cmd *cobra.Command, args []string) {
+func encrypt(cmd *cobra.Command, _ []string) error {
 	var key string
 	var err error
 
@@ -35,22 +38,22 @@ func encrypt(cmd *cobra.Command, args []string) {
 		keyBytes, err := ioutil.ReadFile(keyFile)
 		if err != nil {
 			fmt.Println(err)
-			return
+			return err
 		}
 		key = string(keyBytes)
 	} else { // Read from ~/.iron.json
-		config, err := iron.LoadConfig()
+		cfg, err := config.Load()
 		if err != nil {
 			fmt.Println(err)
-			return
+			return err
 		}
-		if len(config.ClusterInfo) == 0 {
+		if len(cfg.ClusterInfo) == 0 {
 			fmt.Println("missing cluster_info in configuration")
-			return
+			return err
 		}
-		if key = config.ClusterInfo[0].Pubkey; key == "" {
+		if key = cfg.ClusterInfo[0].Pubkey; key == "" {
 			fmt.Println("missing public key in configuration")
-			return
+			return err
 		}
 	}
 
@@ -63,19 +66,22 @@ func encrypt(cmd *cobra.Command, args []string) {
 		input, err = os.Open(inFile)
 		if err != nil {
 			fmt.Println(err)
-			return
+			return err
 		}
-		defer input.Close()
+		defer func() {
+			_ = input.Close()
+		}()
 	}
 	payload, err := ioutil.ReadAll(input)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	ciphertext, err := iron.EncryptPayload([]byte(key), payload)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
-	fmt.Fprintf(os.Stdout, ciphertext+"\n")
+	_, _ = fmt.Fprintf(os.Stdout, ciphertext+"\n")
+	return nil
 }

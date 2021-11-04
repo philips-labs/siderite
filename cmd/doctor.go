@@ -3,28 +3,30 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/philips-labs/siderite/iron"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/philips-software/go-hsdp-api/iron"
+	"github.com/pkg/errors"
+
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
-// doctorCmd represents the doctor command
-var doctorCmd = &cobra.Command{
-	Use:   "doctor",
-	Short: "checks system configuration",
-	Long:  `check wether your system is configure so it can interact with the HSDP iron`,
-	Run:   doctor,
+func NewDoctorCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "doctor",
+		Short: "checks system configuration",
+		Long:  `check weather your system is configure so it can interact with the HSDP iron`,
+		RunE:  doctor,
+	}
 }
 
 func init() {
-	rootCmd.AddCommand(doctorCmd)
+	rootCmd.AddCommand(NewDoctorCmd())
 }
 
 type proc func() error
@@ -120,8 +122,8 @@ func testConfig() error {
 	return nil
 }
 
-func doctor(cmd *cobra.Command, args []string) {
-	var hasErrors bool
+func doctor(_ *cobra.Command, _ []string) error {
+	var errs []error
 
 	e := []proc{
 		testIronCLI,
@@ -130,11 +132,13 @@ func doctor(cmd *cobra.Command, args []string) {
 	}
 
 	for _, p := range e {
-		if p() != nil {
-			hasErrors = true
+		if err := p(); err != nil {
+			errs = append(errs, err)
 		}
 	}
-	if hasErrors {
-		fmt.Println("some hasErrors were detected")
+	if len(errs) > 0 {
+		fmt.Println("some errs were detected")
+		return errs[0]
 	}
+	return nil
 }

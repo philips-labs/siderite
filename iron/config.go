@@ -23,34 +23,37 @@ type Config struct {
 	UserID    string `json:"user_id"`
 }
 
-// LoadConfig loads the Iron config as found in ~/.iron.json
-func LoadConfig() (*Config, error) {
+// Load loads the Iron config as found in ~/.iron.json
+func Load(configFiles ...string) (*Config, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
 	configFile := filepath.Join(home, ".iron.json")
-	data, err_home := ioutil.ReadFile(configFile) //home
-	local_data, err_local := ioutil.ReadFile("iron.json") //iron.json in current directory
+	if len(configFiles) > 0 {
+		configFile = configFiles[0]
+	}
+	data, errHome := ioutil.ReadFile(configFile)        //home
+	localData, errLocal := ioutil.ReadFile("iron.json") //iron.json in current directory
 
 	//If neither home or local json is found
-	if err_local != nil && err_home != nil{
-		return nil, err_home
+	if errLocal != nil && errHome != nil {
+		return nil, errHome
 	}
 
 	var config Config
-	if (err_home == nil){
-		err_home = json.Unmarshal(data, &config)
+	if errHome == nil {
+		errHome = json.Unmarshal(data, &config)
 
-		if(err_home != nil){
-			return nil, err_home
+		if errHome != nil {
+			return nil, errHome
 		}
-	}	
-	if (err_local == nil){
-		err_local = json.Unmarshal(local_data, &config)
+	}
+	if errLocal == nil {
+		errLocal = json.Unmarshal(localData, &config)
 
-		if(err_local != nil){
-			return nil, err_local
+		if errLocal != nil {
+			return nil, errLocal
 		}
 	}
 

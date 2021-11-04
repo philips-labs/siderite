@@ -14,22 +14,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// env2payloadCmd represents the env2payload command
-var env2payloadCmd = &cobra.Command{
-	Use:   "env2payload",
-	Short: "Converts env output to JSON payload",
-	Long: `You can pipe the output of the env command to this command 
+func NewEnv2PayloadCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "env2payload",
+		Short: "Converts env output to JSON payload",
+		Long: `You can pipe the output of the env command to this command 
 which will output a JSON structure with proper escaping`,
-	Run: env2payload,
+		RunE: env2payload,
+	}
 }
 
 func init() {
-	rootCmd.AddCommand(env2payloadCmd)
-	env2payloadCmd.Flags().StringP("include", "i", "", "comma separated list of variables to include")
-	env2payloadCmd.Flags().StringP("exclude", "x", "", "comma separated list of variables to exclude")
-	env2payloadCmd.Flags().StringSliceP("env", "e", []string{}, "add environment variable")
-	env2payloadCmd.Flags().StringSliceP("cmd", "c", []string{}, "command to include")
-	env2payloadCmd.Flags().BoolP("nostdin", "n", false, "skip reading from stdin")
+	cmd := NewEnv2PayloadCmd()
+	rootCmd.AddCommand(cmd)
+	cmd.Flags().StringP("include", "i", "", "comma separated list of variables to include")
+	cmd.Flags().StringP("exclude", "x", "", "comma separated list of variables to exclude")
+	cmd.Flags().StringSliceP("env", "e", []string{}, "add environment variable")
+	cmd.Flags().StringSliceP("cmd", "c", []string{}, "command to include")
+	cmd.Flags().BoolP("nostdin", "n", false, "skip reading from stdin")
 }
 
 var envParse = regexp.MustCompile(`^(.*?)=(.*)$`)
@@ -39,7 +41,7 @@ func contains(s []string, searchterm string) bool {
 	return i < len(s) && s[i] == searchterm
 }
 
-func env2payload(cmd *cobra.Command, _ []string) {
+func env2payload(cmd *cobra.Command, _ []string) error {
 	var payload models.Payload
 
 	payload.Version = "1"
@@ -53,7 +55,7 @@ func env2payload(cmd *cobra.Command, _ []string) {
 
 	if len(include) > 0 && include[0] != "" && len(exclude) > 0 && exclude[0] != "" {
 		_, _ = fmt.Fprintf(os.Stderr, "can't use include and exclude simultaneously\n")
-		return
+		return fmt.Errorf("can't use include and exclude simultaneously")
 	}
 	envInput := []byte("")
 	var err error
@@ -64,7 +66,7 @@ func env2payload(cmd *cobra.Command, _ []string) {
 		envInput, err = ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			fmt.Println(err)
-			return
+			return err
 		}
 	}
 
@@ -114,4 +116,6 @@ func env2payload(cmd *cobra.Command, _ []string) {
 	var out bytes.Buffer
 	_ = json.Indent(&out, b, "", "  ")
 	_, _ = out.WriteTo(os.Stdout)
+
+	return nil
 }
