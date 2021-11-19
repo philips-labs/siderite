@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -14,8 +15,12 @@ type dummyStorer struct {
 }
 
 func (d *dummyStorer) StoreResources(messages []logging.Resource, count int) (*logging.StoreResponse, error) {
-	assert.Greater(d.t, 0, count)
-	assert.Greater(d.t, 0, len(messages))
+	if !assert.Greater(d.t, 0, count) {
+		return nil, fmt.Errorf("count is 0")
+	}
+	if !assert.Greater(d.t, 0, len(messages)) {
+		return nil, fmt.Errorf("zero messages in slice")
+	}
 	return &logging.StoreResponse{
 		Response: &http.Response{
 			StatusCode: http.StatusOK,
@@ -41,6 +46,7 @@ func TestToHSDP(t *testing.T) {
 		ServerName:          "iron.io",
 		ServiceName:         "foo",
 	}, done)
+	done <- true
 
 	assert.Nil(t, err)
 }

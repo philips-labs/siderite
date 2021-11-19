@@ -60,8 +60,6 @@ func Setup(p models.Payload, taskID string) (chan bool, func(), error) {
 	}
 	return done, func() {
 		os.Stdout = old
-		fmt.Printf("flushing logs\n")
-		time.Sleep(3 * time.Second)
 	}, nil
 }
 
@@ -76,8 +74,10 @@ func startStorerWorker(fd *os.File, client Storer, template logging.Resource, do
 				// Next line
 				text, err := fdReader.ReadString('\n')
 				if err != nil {
-					queue <- text
+					queue <- fmt.Sprintf("error reading: %v\n", err)
+					return
 				}
+				queue <- text
 			}(s)
 
 			select {
@@ -97,7 +97,7 @@ func startStorerWorker(fd *os.File, client Storer, template logging.Resource, do
 					}
 				}
 			case <-done:
-				_, _ = fmt.Fprintf(os.Stderr, "exiting logger\n")
+				_, _ = fmt.Fprintf(os.Stderr, "[siderite] exiting logger\n")
 				return
 			}
 		}

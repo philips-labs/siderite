@@ -2,8 +2,10 @@ package logger
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/philips-software/go-hsdp-api/logging"
 )
@@ -25,17 +27,21 @@ func (l *logDrainerStorer) StoreResources(messages []logging.Resource, count int
 	for i := 0; i < count; i++ {
 		var err error
 		msg := messages[i]
-		structuredData := fmt.Sprintf("[spanId=\"%s\" traceId=\"%s\"]", msg.SpanID, msg.TraceID)
-		syslogMessage := fmt.Sprintf("<14>1 %s %s %s %s %s %s", msg.LogTime, msg.ServerName, msg.ApplicationName, msg.ApplicationInstance, structuredData, msg.LogData.Message)
+		decoded, err := base64.StdEncoding.DecodeString(msg.LogData.Message)
+		if err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		syslogMessage := fmt.Sprintf("<14>1 %s %s %s %s - - %s", msg.LogTime, msg.ServerName, msg.ApplicationName, msg.ApplicationInstance, string(decoded))
 		resp, err = l.Client.Post(l.logDrainerURL, "text/syslog", bytes.NewBufferString(syslogMessage))
 		if err != nil {
 			errs = append(errs, err)
 		}
 		if resp == nil || resp.StatusCode != http.StatusOK {
-			logResponse.Failed[i] = messages[i]
+			_, _ = fmt.Fprintf(os.Stderr, "failed to send log: %v %v", resp, err)
 		}
 	}
-	logResponse.Response = resp
+	logResponse.Response = &http.Response{StatusCode: http.StatusOK}
 	return logResponse, nil
 }
 

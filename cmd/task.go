@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"time"
 
 	"github.com/iron-io/iron_go3/worker"
 	"github.com/philips-labs/siderite/logger"
@@ -71,7 +70,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 			return fmt.Errorf("missing command")
 		}
 
-		fmt.Printf("executing: %s %v\n", p.Cmd[0], p.Cmd[1:])
+		fmt.Printf("[siderite] executing: %s %v\n", p.Cmd[0], p.Cmd[1:])
 		command := exec.Command(p.Cmd[0], p.Cmd[1:]...)
 		command.Stdout = os.Stdout
 		command.Stderr = os.Stderr
@@ -80,15 +79,17 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 		for k, v := range p.Env {
 			command.Env = append(command.Env, k+"="+v)
 		}
-		_ = command.Start()
+		err = command.Start()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stdout, "[siderite] error starting command: %v\n", err)
+		}
 		if c != nil {
 			c <- command.Process.Pid // Send to parent
 		}
 		err = command.Wait()
-		fmt.Printf("result: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stdout, "[siderite] command result: %v\n", err)
 		_, _ = fmt.Fprintf(os.Stderr, "[siderite] version %s exit\n", GitCommit)
 		if done != nil {
-			time.Sleep(1 * time.Second)
 			done <- true
 		}
 		return err

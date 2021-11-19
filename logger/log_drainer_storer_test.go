@@ -1,12 +1,14 @@
 package logger_test
 
 import (
+	"encoding/base64"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
+	"github.com/influxdata/go-syslog/v2/rfc5424"
 	"github.com/philips-labs/siderite/logger"
 	"github.com/philips-software/go-hsdp-api/logging"
 	"github.com/stretchr/testify/assert"
@@ -15,6 +17,7 @@ import (
 var (
 	muxLogger    *http.ServeMux
 	loggerServer *httptest.Server
+	parser       = rfc5424.NewParser()
 )
 
 func TestLogDrainer(t *testing.T) {
@@ -39,9 +42,10 @@ func TestLogDrainer(t *testing.T) {
 			ResourceType: "EventLog",
 			LogTime:      time.Now().Format(time.RFC3339),
 			LogData: logging.LogData{
-				Message: "Hello world",
+				Message: base64.StdEncoding.EncodeToString([]byte("Hello world")),
 			},
 			ApplicationInstance: "app_instance",
+			ApplicationName:     "hsdp_function",
 			Severity:            "INFO",
 			ServerName:          "test.terrakube.com",
 		},
@@ -50,6 +54,9 @@ func TestLogDrainer(t *testing.T) {
 		return
 	}
 	if !assert.NotNil(t, resp) {
+		return
+	}
+	if !assert.NotNil(t, resp.Response) {
 		return
 	}
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
@@ -63,7 +70,8 @@ func endpointMocker(t *testing.T, responseBody string, statusCode ...int) func(h
 		}
 		body, _ := ioutil.ReadAll(r.Body)
 
-		if !assert.Contains(t, string(body), "<14>1") {
+		_, err := parser.Parse(body)
+		if !assert.Nil(t, err) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
