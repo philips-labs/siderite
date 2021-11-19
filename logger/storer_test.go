@@ -28,7 +28,7 @@ func TestToHSDP(t *testing.T) {
 	ds := &dummyStorer{t}
 	done := make(chan bool)
 
-	err := toHSDP(os.Stdout, ds, logging.Resource{
+	err := toStorer(os.Stdout, ds, logging.Resource{
 		ResourceType:        "LogEvent",
 		ApplicationInstance: "foo",
 		EventID:             "1",

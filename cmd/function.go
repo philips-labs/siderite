@@ -52,7 +52,7 @@ func NewFunctionCmd() *cobra.Command {
 				taskID = "local"
 			}
 
-			_, deferFunc, err := logger.SetupHSDPLogging(p, taskID)
+			_, deferFunc, err := logger.Setup(p, taskID)
 			if err == nil {
 				defer deferFunc()
 			}

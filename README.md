@@ -37,20 +37,33 @@ siderite defines the following JSON payload format
 
 | field | type |description | required | example      |
 |-------|------|-------|----------|--------------|
-| version | string | version of JSON payload | Y | must be `"1"` for now |
-| cmd | []string | command to execute, array string | Y| `["df", "-h"]` |
-| env | hashmap | hash with environment variables | N | `{"foo": "bar"}` |
+| version | string | version of JSON payload | Required | must be `"1"` for now |
+| cmd | []string | command to execute, array string | Required | `["df", "-h"]` |
+| env | hashmap | hash with environment variables | Optional | `{"foo": "bar"}` |
 
 ## logging
+
 The siderite binary supports direct logging to HSDP logging when the following environment variables
 are set:
 
-| environment | description |
-|-------------|-------------|
-| SIDERITE_LOGINGESTOR_PRODUCT_KEY| The HSDP logging product key |
-| SIDERITE_LOGINGESTOR_KEY | The HSDP logging shared key |
-| SIDERITE_LOGINGESTOR_SECRET | The HSDP logging shared secret |
-| SIDERITE_LOGINGESTOR_URL | The HSDP logging base URL |
+| environment | description | required |
+|-------------|-------------|----------|
+| SIDERITE_LOGINGESTOR_PRODUCT_KEY| The HSDP logging product key | Required |
+| SIDERITE_LOGINGESTOR_KEY | The HSDP logging shared key | Optional |
+| SIDERITE_LOGINGESTOR_SECRET | The HSDP logging shared secret | Optional |
+| SIDERITE_LOGINGESTOR_URL | The HSDP logging base URL | Required when not setting region and environment |
+| SIDERITE_LOGINGESTOR_SERVICE_ID | The HSDP service identity ID to use | Optional |
+| SIDERITE_LOGINGESTOR_SERVICE_PRIVATE_KEY | The private key belonging to the service identity | Optional |
+| SIDERITE_LOGINGESTOR_REGION | The HSDP region | Required for service identity |
+| SIDERITE_LOGINGESTOR_ENVIRONMENT | The HSDP environment (`client-test`, `prod`) | Required for service identity |
+
+## logging using HSDP Logdrainer
+
+If you only have access to a Logdrainer endpoint URL then you can configure it as well
+
+| environment | description | required |
+|-------------|-------------|----------|
+| SIDERITE_LOGDRAINER_URL | The logdrainer endpoint used in CF | Optional |
 
 # commands
 

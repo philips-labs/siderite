@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/iron-io/iron_go3/worker"
 	"github.com/philips-labs/siderite/logger"
@@ -52,7 +53,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 		if taskID == "" {
 			taskID = "local"
 		}
-		_, deferFunc, err := logger.SetupHSDPLogging(p, taskID)
+		done, deferFunc, err := logger.Setup(p, taskID)
 		if err == nil {
 			defer deferFunc()
 		}
@@ -83,6 +84,8 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 		err = command.Wait()
 		fmt.Printf("result: %v\n", err)
 		fmt.Printf("[siderite] version %s exit\n", GitCommit)
+		time.Sleep(1 * time.Second)
+		done <- true // Flush and stop logging
 		return err
 	}
 }
