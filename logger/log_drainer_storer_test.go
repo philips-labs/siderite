@@ -28,7 +28,7 @@ func TestLogDrainer(t *testing.T) {
 
 	logDrainerURL := loggerServer.URL + "/1234"
 
-	storer, err := logger.NewHLogDrainerStorer(map[string]string{
+	storer, err := logger.NewLogDrainerStorer(map[string]string{
 		logger.LogDrainerEnv: logDrainerURL,
 	})
 	if !assert.Nil(t, err) {

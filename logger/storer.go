@@ -30,16 +30,16 @@ func Setup(p models.Payload, taskID string) (chan bool, func(), error) {
 	var storer Storer
 
 	// HSDP LogDrainer
-	storer, err = NewHLogDrainerStorer(p.Env)
+	storer, err = NewLogDrainerStorer(p.Env)
 
 	if err != nil {
 		// HSDP Logging
 		storer, err = NewHSDPStorer(p.Env)
 	}
 	if err != nil {
-		return done, func() {}, err
+		return nil, func() {}, err
 	}
-	err = toStorer(r, storer, logging.Resource{
+	err = startStorerWorker(r, storer, logging.Resource{
 		ResourceType:        "LogEvent",
 		ApplicationInstance: taskID,
 		EventID:             "1",
@@ -54,9 +54,9 @@ func Setup(p models.Payload, taskID string) (chan bool, func(), error) {
 	}, done)
 	if err != nil {
 		os.Stdout = old
-		_, _ = fmt.Fprintf(os.Stdout, "[siderite] not logging to HSDP: %v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "[siderite] not logging to HSDP: %v\n", err)
 	} else {
-		_, _ = fmt.Fprintf(os.Stdout, "[siderite] logging stdout to HSDP\n")
+		_, _ = fmt.Fprintf(os.Stderr, "[siderite] logging stdout to HSDP\n")
 	}
 	return done, func() {
 		os.Stdout = old
@@ -65,32 +65,40 @@ func Setup(p models.Payload, taskID string) (chan bool, func(), error) {
 	}, nil
 }
 
-func toStorer(fd *os.File, client Storer, template logging.Resource, done chan bool) error {
+func startStorerWorker(fd *os.File, client Storer, template logging.Resource, done chan bool) error {
 	fdReader := bufio.NewReader(fd)
 	go func() {
-		for {
-			// Next line
-			text, _ := fdReader.ReadString('\n')
-			// Prepare message
-			template.ID = uuid.New().String()
-			template.TransactionID = template.ID
-			template.LogData.Message = base64.StdEncoding.EncodeToString([]byte(text))
-			template.LogTime = time.Now().Format("2006-01-02T15:04:05.000Z07:00")
+		s := make(chan string)
 
-			if text != "" {
-				resp, err := client.StoreResources([]logging.Resource{
-					template,
-				}, 1)
+		_, _ = fmt.Fprintf(os.Stderr, "[siderite] logging worker started\n")
+		for {
+			go func(queue chan string) {
+				// Next line
+				text, err := fdReader.ReadString('\n')
 				if err != nil {
-					_, _ = fmt.Fprintf(os.Stderr, "error storing: %v [%v]\n", err, resp)
+					queue <- text
 				}
-			}
-			// Check if we should exit
+			}(s)
+
 			select {
+			case text := <-s:
+				// Prepare message
+				template.ID = uuid.New().String()
+				template.TransactionID = template.ID
+				template.LogData.Message = base64.StdEncoding.EncodeToString([]byte(text))
+				template.LogTime = time.Now().Format("2006-01-02T15:04:05.000Z07:00")
+
+				if text != "" {
+					resp, err := client.StoreResources([]logging.Resource{
+						template,
+					}, 1)
+					if err != nil {
+						_, _ = fmt.Fprintf(os.Stderr, "error storing: %v [%v]\n", err, resp)
+					}
+				}
 			case <-done:
 				_, _ = fmt.Fprintf(os.Stderr, "exiting logger\n")
 				return
-			default:
 			}
 		}
 	}()

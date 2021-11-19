@@ -57,8 +57,11 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 		if err == nil {
 			defer deferFunc()
 		}
+		if err != nil {
+			fmt.Printf("[siderite] logger disabled: %v\n", err)
+		}
 
-		_, _ = fmt.Fprintf(os.Stdout, "[siderite] task version %s start\n", GitCommit)
+		_, _ = fmt.Fprintf(os.Stderr, "[siderite] task version %s start\n", GitCommit)
 
 		if len(p.Version) < 1 || p.Version != "1" {
 			fmt.Printf("[siderite] unsupported or unknown payload version: %s\n", p.Version)
@@ -83,9 +86,11 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 		}
 		err = command.Wait()
 		fmt.Printf("result: %v\n", err)
-		fmt.Printf("[siderite] version %s exit\n", GitCommit)
-		time.Sleep(1 * time.Second)
-		done <- true // Flush and stop logging
+		_, _ = fmt.Fprintf(os.Stderr, "[siderite] version %s exit\n", GitCommit)
+		if done != nil {
+			time.Sleep(1 * time.Second)
+			done <- true
+		}
 		return err
 	}
 }

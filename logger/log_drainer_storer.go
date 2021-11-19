@@ -39,7 +39,7 @@ func (l *logDrainerStorer) StoreResources(messages []logging.Resource, count int
 	return logResponse, nil
 }
 
-func NewHLogDrainerStorer(env map[string]string) (Storer, error) {
+func NewLogDrainerStorer(env map[string]string) (Storer, error) {
 	logDrainerURL := env[LogDrainerEnv]
 	if logDrainerURL == "" {
 		return nil, fmt.Errorf("missing '%s' needed by LogDrainerStorer", LogDrainerEnv)
