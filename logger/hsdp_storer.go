@@ -30,8 +30,8 @@ func NewHSDPStorer(env map[string]string) (Storer, error) {
 	cfg := &logging.Config{
 		BaseURL:      env[LogIngestorURLEnv],
 		ProductKey:   env[LogIngestorProductKeyEnv],
-		SharedSecret: sharedKey,
-		SharedKey:    sharedSecret,
+		SharedSecret: sharedSecret,
+		SharedKey:    sharedKey,
 		Region:       region,
 		Environment:  environment,
 		DebugLog:     env[LogIngestorDebugLogEnv],
