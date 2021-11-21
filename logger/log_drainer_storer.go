@@ -43,7 +43,7 @@ func (l *logDrainerStorer) StoreResources(messages []logging.Resource, count int
 		syslogMessage.SetProcID("[APP/PROC/SIDERITE/0]")
 		syslogMessage.SetAppname(msg.ApplicationName)
 		syslogMessage.SetHostname(msg.ServerName)
-		syslogMessage.SetParameter("siderite", "key", "value")
+		syslogMessage.SetParameter("siderite", "taskId", msg.ApplicationInstance)
 		syslogMessage.SetMessage(string(decoded))
 		message, _ := syslogMessage.String()
 		req := &http.Request{
