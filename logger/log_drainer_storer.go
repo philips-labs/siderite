@@ -1,12 +1,16 @@
 package logger
 
 import (
-	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
+	"time"
 
+	"github.com/influxdata/go-syslog/v2/rfc5424"
 	"github.com/philips-software/go-hsdp-api/logging"
 )
 
@@ -15,8 +19,8 @@ const (
 )
 
 type logDrainerStorer struct {
-	logDrainerURL string
 	*http.Client
+	logDrainerURL *url.URL
 }
 
 func (l *logDrainerStorer) StoreResources(messages []logging.Resource, count int) (*logging.StoreResponse, error) {
@@ -32,8 +36,25 @@ func (l *logDrainerStorer) StoreResources(messages []logging.Resource, count int
 			errs = append(errs, err)
 			continue
 		}
-		syslogMessage := fmt.Sprintf("<14>1 %s %s %s %s - - %s", msg.LogTime, msg.ServerName, msg.ApplicationName, msg.ApplicationInstance, string(decoded))
-		resp, err = l.Client.Post(l.logDrainerURL, "text/syslog", bytes.NewBufferString(syslogMessage))
+		syslogMessage := rfc5424.SyslogMessage{}
+		syslogMessage.SetTimestamp(time.Now().Format(time.RFC3339))
+		syslogMessage.SetPriority(14)
+		syslogMessage.SetVersion(1)
+		syslogMessage.SetProcID("[APP/PROC/SIDERITE/0]")
+		syslogMessage.SetAppname(msg.ApplicationName)
+		syslogMessage.SetHostname(msg.ServerName)
+		syslogMessage.SetParameter("siderite", "key", "value")
+		syslogMessage.SetMessage(string(decoded))
+		message, _ := syslogMessage.String()
+		req := &http.Request{
+			Method: http.MethodPost,
+			URL:    l.logDrainerURL,
+			Header: http.Header{
+				"Content-Type": []string{"text/plain"},
+			},
+		}
+		req.Body = ioutil.NopCloser(strings.NewReader(message))
+		resp, err = l.Client.Do(req)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -50,9 +71,13 @@ func NewLogDrainerStorer(env map[string]string) (Storer, error) {
 	if logDrainerURL == "" {
 		return nil, fmt.Errorf("missing '%s' needed by LogDrainerStorer", LogDrainerEnv)
 	}
+	parsedURL, err := url.Parse(logDrainerURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL '%s': %v", logDrainerURL, err)
+	}
 	storer := &logDrainerStorer{
 		Client:        &http.Client{},
-		logDrainerURL: logDrainerURL,
+		logDrainerURL: parsedURL,
 	}
 
 	return storer, nil

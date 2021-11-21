@@ -49,7 +49,7 @@ func Setup(p models.Payload, taskID string) (chan bool, func(), error) {
 		Category:            "FunctionLog",
 		Severity:            "info",
 		OriginatingUser:     "siderite",
-		ServerName:          "iron.io",
+		ServerName:          "hsdp-function.siderite.ironworker",
 		ServiceName:         taskID,
 	}, done)
 	if err != nil {
