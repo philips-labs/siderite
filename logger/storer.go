@@ -37,6 +37,7 @@ func Setup(p models.Payload, taskID string) (chan bool, func(), error) {
 		storer, err = NewHSDPStorer(p.Env)
 	}
 	if err != nil {
+		os.Stdout = old // Reset
 		return nil, func() {}, err
 	}
 	err = startStorerWorker(r, storer, logging.Resource{
