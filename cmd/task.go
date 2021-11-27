@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/iron-io/iron_go3/worker"
 	"github.com/philips-labs/siderite/logger"
@@ -52,7 +53,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 		if taskID == "" {
 			taskID = "local"
 		}
-		done, deferFunc, err := logger.Setup(p, taskID)
+		control, marker, deferFunc, err := logger.Setup(p, taskID)
 		if err == nil {
 			defer deferFunc()
 		}
@@ -88,10 +89,16 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 		}
 		err = command.Wait()
 		_, _ = fmt.Fprintf(os.Stdout, "[siderite] command result: %v\n", err)
-		_, _ = fmt.Fprintf(os.Stderr, "[siderite] version %s exit\n", GitCommit)
-		if done != nil {
-			done <- true
+		// Handle logger flushing
+		if control != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "[siderite] waiting for logs to flush\n")
+			_, _ = fmt.Fprintf(os.Stdout, "%s\n", marker)
+			select {
+			case <-control:
+			case <-time.After(5 * time.Second):
+			}
 		}
+		_, _ = fmt.Fprintf(os.Stderr, "[siderite] version %s exit\n", GitCommit)
 		return err
 	}
 }

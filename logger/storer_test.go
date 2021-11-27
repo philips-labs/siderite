@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/philips-software/go-hsdp-api/logging"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,9 +33,14 @@ func (d *dummyStorer) StoreResources(messages []logging.Resource, count int) (*l
 
 func TestToHSDP(t *testing.T) {
 	ds := &dummyStorer{t}
-	done := make(chan bool)
+	control := make(chan string)
+	marker := fmt.Sprintf("!^?%d?~!", uuid.New().ID())
 
-	err := startStorerWorker(os.Stdout, ds, logging.Resource{
+	r, w, err := os.Pipe()
+	if !assert.Nil(t, err) {
+		return
+	}
+	err = startStorerWorker(r, ds, logging.Resource{
 		ResourceType:        "LogEvent",
 		ApplicationInstance: "foo",
 		EventID:             "1",
@@ -45,8 +52,23 @@ func TestToHSDP(t *testing.T) {
 		OriginatingUser:     "siderite",
 		ServerName:          "iron.io",
 		ServiceName:         "foo",
-	}, done)
-	done <- true
-
-	assert.Nil(t, err)
+	}, control, marker)
+	if !assert.Nil(t, err) {
+		return
+	}
+	// Simulate task/func output
+	quit := make(chan bool)
+	go func() {
+		for {
+			_, _ = fmt.Fprintf(w, "%s\n", marker) // Immediate trigger
+			select {
+			case <-time.After(100 * time.Millisecond):
+			case <-quit:
+				return
+			}
+		}
+	}()
+	data := <-control
+	quit <- true
+	assert.Equal(t, marker, data)
 }

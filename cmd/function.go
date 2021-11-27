@@ -52,7 +52,7 @@ func NewFunctionCmd() *cobra.Command {
 				taskID = "local"
 			}
 
-			_, deferFunc, err := logger.Setup(p, taskID)
+			control, marker, deferFunc, err := logger.Setup(p, taskID)
 			if err == nil {
 				defer deferFunc()
 			}
@@ -134,6 +134,15 @@ func NewFunctionCmd() *cobra.Command {
 			fmt.Printf("[siderite] chisel client running. waiting...\n")
 			if err := client.Wait(); err != nil {
 				log.Fatal(err)
+			}
+			// Handle logger flushing
+			if control != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "[siderite] waiting for logs to flush\n")
+				_, _ = fmt.Fprintf(os.Stdout, "%s\n", marker)
+				select {
+				case <-control:
+				case <-time.After(5 * time.Second):
+				}
 			}
 			return nil
 		},
