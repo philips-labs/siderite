@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/fatih/color v1.13.0
-	github.com/go-resty/resty/v2 v2.6.0
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/influxdata/go-syslog/v2 v2.0.1
 	github.com/iron-io/iron_go3 v0.0.0-20190916120531-a4a7f74b73ac
