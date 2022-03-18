@@ -9,7 +9,7 @@ require (
 	github.com/influxdata/go-syslog/v2 v2.0.1
 	github.com/iron-io/iron_go3 v0.0.0-20190916120531-a4a7f74b73ac
 	github.com/jeffh/go.bdd v0.0.0-20120717032931-88f798ee0c74 // indirect
-	github.com/jpillora/chisel v1.7.6
+	github.com/jpillora/chisel v1.7.7
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philips-software/go-hsdp-api v0.61.9
 	github.com/pkg/errors v0.9.1
