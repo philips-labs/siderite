@@ -3,7 +3,7 @@ module github.com/philips-labs/siderite
 go 1.16
 
 require (
-	github.com/fatih/color v1.13.0
+	github.com/fatih/color v1.14.1
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/influxdata/go-syslog/v2 v2.0.1
