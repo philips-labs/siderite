@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/influxdata/go-syslog/v2 v2.0.1
 	github.com/iron-io/iron_go3 v0.0.0-20190916120531-a4a7f74b73ac
-	github.com/jpillora/chisel v1.7.7
+	github.com/jpillora/chisel v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/philips-software/go-hsdp-api v0.79.1
 	github.com/pkg/errors v0.9.1
