@@ -11,9 +11,10 @@ require (
 	github.com/jeffh/go.bdd v0.0.0-20120717032931-88f798ee0c74 // indirect
 	github.com/jpillora/chisel v1.7.7
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/philips-software/go-hsdp-api v0.73.6
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.6.1
-	github.com/spf13/viper v1.13.0
+	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
 )
