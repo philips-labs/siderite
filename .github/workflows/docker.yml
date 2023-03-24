@@ -36,7 +36,7 @@ jobs:
       -
         name: Build and push alpine
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./
           file: ./Dockerfile
@@ -51,7 +51,7 @@ jobs:
       -
         name: Build and push debian
         id: docker_build_debian
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: ./
           file: ./Dockerfile.debian
