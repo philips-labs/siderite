@@ -8,26 +8,56 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Login to DockerHub
-        uses: docker/login-action@v2 
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Calculate Docker image tags
+        id: tags
+        env:
+          DOCKER_IMAGES: "ghcr.io/philips-labs/siderite"
+        run: |
+          case $GITHUB_REF in
+            refs/tags/*)  VERSION=${GITHUB_REF#refs/tags/};;
+            refs/heads/*) VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g');;
+            refs/pull/*)  VERSION=pr-${{ github.event.number }};;
+            *)            VERSION=sha-${GITHUB_SHA::8};;
+          esac
+
+          TAGS=()
+          for image in $DOCKER_IMAGES; do
+            TAGS+=("${image}:${VERSION}")
+
+            if [[ "${{ github.event.repository.default_branch }}" == "$VERSION" ]]; then
+              TAGS+=("${image}:latest")
+            fi
+          done
+
+          echo ::set-output name=version::${VERSION}
+          echo ::set-output name=tags::$(IFS=,; echo "${TAGS[*]}")
+          echo ::set-output name=commit_hash::${GITHUB_SHA::8}
+          echo ::set-output name=build_date::$(git show -s --format=%cI)
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      -
-        name: Login to HSDP Docker registry
+          platforms: all
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+          version: latest
+          # TODO: Remove driver-opts once fix is released docker/buildx#386
+          driver-opts: image=moby/buildkit:master
+
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          registry: docker.na1.hsdp.io
-          username: ${{ secrets.HSDP_DOCKER_USERNAME }}
-          password: ${{ secrets.HSDP_DOCKER_PASSWORD }}
-      - 
-        name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          # We must fetch at least the immediate parents so that if this is
-          # a pull request then we can checkout the head.
-          fetch-depth: 2
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ github.token }}
+        if: github.event_name == 'push'
+
       - name: Git information
         id: vars
         shell: bash
@@ -44,7 +74,7 @@ jobs:
             GIT_COMMIT=${{ steps.vars.outputs.sha_short }}
           platforms: linux/amd64
           push: true
-          tags: philipslabs/siderite:latest,docker.na1.hsdp.io/philipslabs/siderite:latest
+          tags: ${{ steps.tags.outputs.tags }}
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -59,7 +89,7 @@ jobs:
             GIT_COMMIT=${{ steps.vars.outputs.sha_short }}
           platforms: linux/amd64
           push: true
-          tags: philipslabs/siderite:latest-debian,docker.na1.hsdp.io/philipslabs/siderite:latest-debian
+          tags: ${{ steps.tags.outputs.tags }}-debian
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

@@ -94,7 +94,7 @@ func startStorerWorker(fd *os.File, client Storer, template logging.Resource, co
 					template,
 				}, 1)
 				if err != nil {
-					_, _ = fmt.Fprintf(os.Stderr, "error storing: %v [%v]\n", err, resp)
+					_, _ = fmt.Fprintf(os.Stderr, "error storing: %v [%+v]\n", err, resp)
 				}
 			}
 		}
