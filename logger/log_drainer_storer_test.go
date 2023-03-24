@@ -59,7 +59,7 @@ func TestLogDrainer(t *testing.T) {
 	if !assert.NotNil(t, resp.Response) {
 		return
 	}
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, http.StatusOK, resp.StatusCode())
 }
 
 func endpointMocker(t *testing.T, responseBody string, statusCode ...int) func(http.ResponseWriter, *http.Request) {

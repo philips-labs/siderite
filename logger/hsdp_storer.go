@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"os"
+
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/go-hsdp-api/logging"
 )
@@ -14,7 +16,7 @@ const (
 	LogIngestorEnvironmentEnv       = "SIDERITE_LOGINGESTOR_ENVIRONMENT"
 	LogIngestorProductKeyEnv        = "SIDERITE_LOGINGESTOR_PRODUCT_KEY"
 	LogIngestorURLEnv               = "SIDERITE_LOGINGESTOR_URL"
-	LogIngestorDebugLogEnv          = "SIDERITE_LOGINGESTOR_DEBUG_LOG"
+	LogIngestorDebug                = "SIDERITE_LOGINGESTOR_DEBUG"
 )
 
 func NewHSDPStorer(env map[string]string) (Storer, error) {
@@ -34,7 +36,9 @@ func NewHSDPStorer(env map[string]string) (Storer, error) {
 		SharedKey:    sharedKey,
 		Region:       region,
 		Environment:  environment,
-		DebugLog:     env[LogIngestorDebugLogEnv],
+	}
+	if env[LogIngestorDebug] != "" {
+		cfg.DebugLog = os.Stderr
 	}
 	client, err := logging.NewClient(nil, cfg)
 	if err != nil {
