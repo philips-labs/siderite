@@ -1,5 +1,5 @@
 ARG GIT_COMMIT=unknown
-FROM golang:1.17.3-alpine3.13 as builder
+FROM golang:1.20.2-alpine as builder
 ARG GIT_COMMIT
 RUN apk add --no-cache git
 WORKDIR /siderite
@@ -13,7 +13,7 @@ RUN go mod download
 COPY . .
 RUN GIT_COMMIT=$GIT_COMMIT go build -ldflags "-X github.com/philips-labs/siderite/cmd.GitCommit=${GIT_COMMIT}"
 
-FROM golang:1.17.3-alpine3.13
+FROM alpine:latest
 LABEL maintainer="andy.lo-a-foe@philips.com"
 WORKDIR /app
 COPY --from=builder /siderite/siderite /app
