@@ -5,12 +5,17 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/philips-labs/siderite/models"
 	"github.com/philips-software/go-hsdp-api/logging"
+)
+
+var (
+	CustomLogEventRegex = regexp.MustCompile(`^(?P<severity>[^\|\s]+)\s*\|\s*CustomLogEvent\s*\|\s*(?P<transaction_id>[^\|\s]*)\s*\|\s*(?P<trace_id>[^\|\s]*)\s*\|\s*(?P<span_id>[^\|\s]*)\s*\|\s*(?P<component_name>[^\|\s]*)\s*\|\s*(?P<logdata_message>.*)$`)
 )
 
 type Storer interface {
@@ -43,7 +48,7 @@ func Setup(p models.Payload, taskID string) (chan string, string, func(), error)
 		os.Stdout = old // Reset
 		return nil, marker, func() {}, err
 	}
-	err = startStorerWorker(r, storer, logging.Resource{
+	err = StartStorerWorker(r, storer, logging.Resource{
 		ResourceType:        "LogEvent",
 		ApplicationInstance: taskID,
 		EventID:             "1",
@@ -67,11 +72,13 @@ func Setup(p models.Payload, taskID string) (chan string, string, func(), error)
 	}, nil
 }
 
-func startStorerWorker(fd *os.File, client Storer, template logging.Resource, control chan string, marker string) error {
+func StartStorerWorker(fd *os.File, client Storer, template logging.Resource, control chan string, marker string) error {
 	fdReader := bufio.NewReader(fd)
 
 	go func() {
 		_, _ = fmt.Fprintf(os.Stderr, "[siderite] logging worker started\n")
+		names := CustomLogEventRegex.SubexpNames()
+		md := map[string]string{}
 		for {
 			text, err := fdReader.ReadString('\n')
 			if err != nil {
@@ -83,15 +90,28 @@ func startStorerWorker(fd *os.File, client Storer, template logging.Resource, co
 				control <- marker // Notify task/function runner
 				return
 			}
+
 			// Prepare message
-			template.ID = uuid.New().String()
-			template.TransactionID = template.ID
-			template.LogData.Message = base64.StdEncoding.EncodeToString([]byte(text))
-			template.LogTime = time.Now().Format("2006-01-02T15:04:05.000Z07:00")
+			msg := template
+			msg.ID = uuid.New().String()
+			msg.TransactionID = template.ID
+			msg.LogData.Message = base64.StdEncoding.EncodeToString([]byte(text))
+			msg.LogTime = time.Now().Format("2006-01-02T15:04:05.000Z07:00")
+
+			// Check for CustomLogEvent
+			match := CustomLogEventRegex.FindStringSubmatch(text)
+			for i, n := range match {
+				md[names[i]] = n
+			}
+			if len(match) > 0 {
+				msg.Severity = md["severity"]
+				msg.TransactionID = md["transaction_id"]
+				msg.TraceID = md["trace_id"]
+			}
 
 			if text != "" {
 				resp, err := client.StoreResources([]logging.Resource{
-					template,
+					msg,
 				}, 1)
 				if err != nil {
 					_, _ = fmt.Fprintf(os.Stderr, "error storing: %v [%+v]\n", err, resp)

@@ -1,4 +1,4 @@
-package logger
+package logger_test
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/philips-labs/siderite/logger"
 	"github.com/philips-software/go-hsdp-api/logging"
 	"github.com/stretchr/testify/assert"
 )
@@ -40,7 +41,7 @@ func TestToHSDP(t *testing.T) {
 	if !assert.Nil(t, err) {
 		return
 	}
-	err = startStorerWorker(r, ds, logging.Resource{
+	err = logger.StartStorerWorker(r, ds, logging.Resource{
 		ResourceType:        "LogEvent",
 		ApplicationInstance: "foo",
 		EventID:             "1",
@@ -71,4 +72,20 @@ func TestToHSDP(t *testing.T) {
 	data := <-control
 	quit <- true
 	assert.Equal(t, marker, data)
+}
+
+func TestCustomLogEvent(t *testing.T) {
+	testLog := `ERROR|CustomLogEvent|386a881c-de7a-4ba6-9acc-778e9897e997|a7629ac1d152517466d6ea17a499f3c4|4408ca86d9ce19d6|AuditClientResponseHandler|Error in persisting the audit message to audit repository`
+
+	names := logger.CustomLogEventRegex.SubexpNames()
+	md := map[string]string{}
+
+	match := logger.CustomLogEventRegex.FindStringSubmatch(testLog)
+	for i, n := range match {
+		md[names[i]] = n
+	}
+
+	assert.Equal(t, "ERROR", md["severity"])
+	assert.Equal(t, "4408ca86d9ce19d6", md["span_id"])
+	assert.Equal(t, "a7629ac1d152517466d6ea17a499f3c4", md["trace_id"])
 }
