@@ -94,7 +94,7 @@ func StartStorerWorker(fd *os.File, client Storer, template logging.Resource, co
 			// Prepare message
 			msg := template
 			msg.ID = uuid.New().String()
-			msg.TransactionID = template.ID
+			msg.TransactionID = msg.ID
 			msg.LogData.Message = base64.StdEncoding.EncodeToString([]byte(text))
 			msg.LogTime = time.Now().Format("2006-01-02T15:04:05.000Z07:00")
 
