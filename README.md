@@ -7,7 +7,7 @@ siderite is a companion tool to the iron CLI to make the interaction with the HS
 * Access to HSDP CF
 
 # install siderite binary
-Ensure you have [Go 1.16 or newer](https://golang.org/dl/) installed, then:
+Ensure you have [Go 1.21 or newer](https://golang.org/dl/) installed, then:
 
 ```shell
 $ go install github.com/philips-labs/siderite@latest
