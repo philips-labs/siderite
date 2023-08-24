@@ -89,3 +89,17 @@ func TestCustomLogEvent(t *testing.T) {
 	assert.Equal(t, "4408ca86d9ce19d6", md["span_id"])
 	assert.Equal(t, "a7629ac1d152517466d6ea17a499f3c4", md["trace_id"])
 }
+
+func TestEmptyFields(t *testing.T) {
+	testLog := `ERROR|CustomLogEvent|||||Failed to start Application`
+	names := logger.CustomLogEventRegex.SubexpNames()
+	md := map[string]string{}
+
+	match := logger.CustomLogEventRegex.FindStringSubmatch(testLog)
+	for i, n := range match {
+		md[names[i]] = n
+	}
+
+	assert.Equal(t, "ERROR", md["severity"])
+	assert.Equal(t, "Failed to start Application", md["logdata_message"])
+}

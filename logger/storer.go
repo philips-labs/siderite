@@ -3,6 +3,7 @@ package logger
 import (
 	"bufio"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -107,6 +108,12 @@ func StartStorerWorker(fd *os.File, client Storer, template logging.Resource, co
 				msg.Severity = md["severity"]
 				msg.TransactionID = md["transaction_id"]
 				msg.TraceID = md["trace_id"]
+			}
+
+			// Check for passthrough events
+			var pt logging.Resource
+			if err := json.Unmarshal([]byte(text), &pt); err == nil && pt.ResourceType == "LogEvent" {
+				msg = pt // Replace
 			}
 
 			if text != "" {
