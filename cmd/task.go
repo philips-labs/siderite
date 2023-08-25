@@ -45,7 +45,7 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 		}
 		err := worker.PayloadFromJSON(&p)
 		if err != nil {
-			fmt.Printf("[siderite] failed to read payload from JSON: %v\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "[siderite] failed to read payload from JSON: %v\n", err)
 			return err
 		}
 
@@ -58,20 +58,20 @@ func task(parseFlags bool, c chan int) func(cmd *cobra.Command, args []string) e
 			defer deferFunc()
 		}
 		if err != nil {
-			fmt.Printf("[siderite] logger disabled: %v\n", err)
+			_, _ = fmt.Fprintf(os.Stderr, "[siderite] logger disabled: %v\n", err)
 		}
 
 		_, _ = fmt.Fprintf(os.Stderr, "[siderite] task version %s start\n", GitCommit)
 
 		if len(p.Version) < 1 || p.Version != "1" {
-			fmt.Printf("[siderite] unsupported or unknown payload version: %s\n", p.Version)
+			_, _ = fmt.Fprintf(os.Stderr, "[siderite] unsupported or unknown payload version: %s\n", p.Version)
 		}
 		if len(p.Cmd) < 1 {
-			fmt.Printf("[siderite] missing command\n")
+			_, _ = fmt.Fprintf(os.Stderr, "[siderite] missing command\n")
 			return fmt.Errorf("missing command")
 		}
 
-		fmt.Printf("[siderite] executing: %s %v\n", p.Cmd[0], p.Cmd[1:])
+		_, _ = fmt.Fprintf(os.Stderr, "[siderite] executing: %s %v\n", p.Cmd[0], p.Cmd[1:])
 		command := exec.Command(p.Cmd[0], p.Cmd[1:]...)
 		command.Stdout = os.Stdout
 		command.Stderr = os.Stderr
