@@ -12,7 +12,7 @@ require (
 	github.com/iron-io/iron_go3 v0.0.0-20190916120531-a4a7f74b73ac
 	github.com/jpillora/chisel v1.9.1
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/philips-software/go-hsdp-api v0.81.3
+	github.com/philips-software/go-hsdp-api v0.82.4
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
@@ -27,7 +27,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.14.0 // indirect
+	github.com/go-playground/validator/v10 v10.15.3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
