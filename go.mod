@@ -12,7 +12,7 @@ require (
 	github.com/iron-io/iron_go3 v0.0.0-20190916120531-a4a7f74b73ac
 	github.com/jpillora/chisel v1.9.1
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/philips-software/go-hsdp-api v0.83.1
+	github.com/philips-software/go-hsdp-api v0.83.2
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.17.0
