@@ -1,5 +1,5 @@
 ARG GIT_COMMIT=unknown
-FROM golang:1.21.3-alpine as builder
+FROM golang:1.21.4-alpine as builder
 ARG GIT_COMMIT
 RUN apk add --no-cache git
 WORKDIR /siderite
