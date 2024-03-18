@@ -14,7 +14,7 @@ $ go install github.com/philips-labs/siderite@latest
 ```
 
 # configuration
-next you need to have a Iron.io instances provisioned through the HSDP Iron broker. The service details of this instance should be in your home folder as `~/.iron.json`. This can be done using the sequence of commands shown below:
+next you need to have a Iron.io instances provisioned through an Iron.io service broker. The service details of this instance should be in your home folder as `~/.iron.json`. This can be done using the sequence of commands shown below:
 
 ```shell
 $ cf cs hsdp-iron dev-large-encrypted iron
