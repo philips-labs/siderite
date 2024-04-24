@@ -1,6 +1,13 @@
 # siderite
 siderite is a companion tool to the iron CLI to make the interaction with the Iron.io service more pleasant. It can both prepare the payloads for your tasks and also act as a runner in your dockerized workload to interpret the payload.
 
+## Disclaimer
+
+> [!Important]
+> This repository is managed as Philips Inner-source / Open-source.
+> This repository is NOT endorsed or supported by HSSA&P or I&S Cloud Operations. 
+> You are expected to self-support or raise tickets on the Github project and NOT raise tickets in HSP ServiceNow. 
+
 # requirements
 * IronCLI - https://dev.iron.io/worker/reference/cli/
 * CF CLI - https://docs.cloudfoundry.org/cf-cli/install-go-cli.html
