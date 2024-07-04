@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/fatih/color v1.15.0
+	github.com/fatih/color v1.17.0
 	github.com/go-resty/resty/v2 v2.10.0
 	github.com/google/uuid v1.6.0
 	github.com/influxdata/go-syslog/v2 v2.0.1
@@ -39,7 +39,7 @@ require (
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.18 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/philips-software/go-hsdp-signer v1.4.0 // indirect
