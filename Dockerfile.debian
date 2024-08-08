@@ -1,5 +1,5 @@
 ARG GIT_COMMIT=unknown
-FROM golang:1.21.6-bullseye as builder
+FROM golang:1.22.6-bullseye as builder
 ARG GIT_COMMIT
 WORKDIR /siderite
 COPY go.mod .
@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 RUN GIT_COMMIT=$GIT_COMMIT go build -ldflags "-X github.com/philips-labs/siderite/cmd.GitCommit=${GIT_COMMIT}"
 
-FROM golang:1.21.6-bullseye
+FROM golang:1.22.6-bullseye
 WORKDIR /app
 COPY --from=builder /siderite/siderite /app
 ENTRYPOINT ["/app/siderite","runner"]
