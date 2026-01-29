@@ -1,5 +1,3 @@
-# DEPRECATED: please use https://github.com/dip-software/siderite
-
 # siderite
 siderite is a companion tool to the iron CLI to make the interaction with the Iron.io service more pleasant. It can both prepare the payloads for your tasks and also act as a runner in your dockerized workload to interpret the payload.
 
